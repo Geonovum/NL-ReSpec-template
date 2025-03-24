@@ -30,7 +30,6 @@ jobs:
           mkdir content
           shopt -s extglob
           mv !(content) content
-
       - name: Checkout private docs
         uses: actions/checkout@v4
         with:
