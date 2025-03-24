@@ -1,0 +1,23 @@
+name: Main Workflow
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - githubactions-moves
+#  pull_request:
+#  release:
+#    types: [published]
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  check:
+    needs: build
+    uses: ./.github/workflows/check.yml
+
+  publish:
+#    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    needs: check
+    uses: ./.github/workflows/publish.yml

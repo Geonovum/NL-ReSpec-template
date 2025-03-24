@@ -1,0 +1,53 @@
+name: Publish
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-22.04
+    environment:
+      name: production
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recover HTML
+        uses: actions/cache@v4
+        with:
+          path: ~/static
+          key: ${{ github.run_id }}
+
+      - name: Gather files
+        run: |
+          rm -f *.md *.html
+          mv ~/static/* ./
+          mv snapshot.html index.html
+          mkdir content
+          shopt -s extglob
+          mv !(content) content
+
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+        with:
+          repository: Geonovum/docs.geostandaarden.nl
+          path: docs.geostandaarden.nl
+          token: ${{ secrets.GH_PUSH_TOKEN }}
+
+      - name: Copy output
+        run: |
+          cp -r index.html content docs.geostandaarden.nl/
+
+      - name: Create PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_PUSH_TOKEN }}
+          path: docs.geostandaarden.nl
+          branch: auto-update-${{ github.run_id }}
+          base: main
+          title: "Automated update from ${{ github.repository }}"
+          body: "Update vanuit workflow"
