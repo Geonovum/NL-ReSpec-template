@@ -31,12 +31,12 @@ jobs:
           shopt -s extglob
           mv !(content) content
 
-      - name: Checkout docs repo
+      - name: Checkout private docs
         uses: actions/checkout@v4
         with:
           repository: Geonovum/docs.geostandaarden.nl
-          path: docs.geostandaarden.nl
           token: ${{ secrets.GH_PUSH_TOKEN }}
+          path: docs.geostandaarden.nl
 
       - name: Copy output
         run: |
