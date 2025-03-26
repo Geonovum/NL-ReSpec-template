@@ -6,7 +6,9 @@ Gebruik de knop [_Use this template_](https://github.com/Geonovum/NL-ReSpec-GN-t
 
 De dynamische pagina is van het template document [hier](https://geonovum.github.io/NL-ReSpec-GN-template/) te zien.
 
+
 Deze repository bevat ook de GitHub Workflows om een statische HTML-pagina en PDF-document te genereren en enkele controles uit te voeren. Deze workflows worden automatisch gerund zodra er een aanpassing gedaan wordt aan de main branch.
+
 
 ### Vereiste voor gebruik
 - Kennis van git/github
