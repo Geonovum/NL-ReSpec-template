@@ -55,5 +55,12 @@ jobs:
           path: docs.geostandaarden.nl
           branch: auto-update-${{ github.run_id }}
           base: main
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           title: "Automated update from ${{ github.repository }}"
           body: "Update vanuit workflow voor domein ${{ steps.pubdomain.outputs.pubdomain }}"
+          labels: automated pr
+          delete-branch: true
+          reviewers: |
+            fterpstra
+            wilkoquak
+            lvdbrink
