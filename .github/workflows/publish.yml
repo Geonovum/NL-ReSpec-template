@@ -1,6 +1,9 @@
 name: Publish
 on:
   workflow_call:
+    secrets:
+      GH_PUSH_TOKEN:
+        required: true
   workflow_dispatch:
 
 jobs:
@@ -13,9 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Check if token exists
-        run: echo "Token is set"
-        if: ${{ secrets.GH_PUSH_TOKEN != '' }}
 
       - name: Recover HTML
         uses: actions/cache@v4
