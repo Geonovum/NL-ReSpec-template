@@ -33,7 +33,7 @@ jobs:
       - name: Extract pubDomain
         id: pubdomain
         run: |
-          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+' content/js/config.js)
+          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]')
           echo "pubdomain=$DOMAIN" >> $GITHUB_OUTPUT
 
       - name: Checkout private docs
