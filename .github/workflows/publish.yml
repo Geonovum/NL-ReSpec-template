@@ -60,7 +60,4 @@ jobs:
           body: "Update vanuit workflow voor domein ${{ steps.pubdomain.outputs.pubdomain }}"
           labels: automated pr
           delete-branch: true
-          assignees: |
-            fterpstra
-            wilkoquak
-            lvdbrink
+          reviewers: wilkoquak,fterpstra,lvdbrink
