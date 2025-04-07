@@ -23,7 +23,7 @@ jobs:
           path: ~/static
           key: snapshot-${{ github.sha }}
 
-      - name: Gather files
+      - name: Prepare content
         run: |
           rm -f *.md *.html
           mv ~/static/* ./
@@ -32,6 +32,12 @@ jobs:
           shopt -s extglob
           mv !(content) content
 
+      - name: Extract pubDomain
+        id: pubdomain
+        run: |
+          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+' content/js/config.js)
+          echo "pubdomain=$DOMAIN" >> $GITHUB_OUTPUT
+
       - name: Checkout private docs
         uses: actions/checkout@v4
         with:
@@ -39,9 +45,10 @@ jobs:
           token: ${{ secrets.GH_PUSH_TOKEN }}
           path: docs.geostandaarden.nl
 
-      - name: Copy output
+      - name: Copy output to pubDomain folder
         run: |
-          cp -r content/index.html content docs.geostandaarden.nl/
+          mkdir -p docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}
+          cp -r content/* docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}/
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
@@ -51,4 +58,4 @@ jobs:
           branch: auto-update-${{ github.run_id }}
           base: main
           title: "Automated update from ${{ github.repository }}"
-          body: "Update vanuit workflow"
+          body: "Update vanuit workflow voor domein ${{ steps.pubdomain.outputs.pubdomain }}"
