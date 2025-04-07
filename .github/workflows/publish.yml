@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/static
-          key: ${{ github.run_id }}
+          key: snapshot-${{ github.sha }}
 
 
       - name: Gather files
