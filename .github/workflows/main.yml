@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - develop
-      - githubactions-moves
+      - nieuwe-branch-naam
 #  pull_request:
 #  release:
 #    types: [published]
