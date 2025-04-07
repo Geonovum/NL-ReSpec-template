@@ -22,7 +22,6 @@ jobs:
           path: ~/static
           key: ${{ github.run_id }}
 
-
       - name: Gather files
         run: |
           rm -f *.md *.html
