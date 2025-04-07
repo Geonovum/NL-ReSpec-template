@@ -23,14 +23,15 @@ jobs:
           path: ~/static
           key: snapshot-${{ github.sha }}
 
-
       - name: Gather files
         run: |
           rm -f *.md *.html
           mv ~/static/* ./
+          mv snapshot.html index.html
           mkdir content
           shopt -s extglob
           mv !(content) content
+
       - name: Checkout private docs
         uses: actions/checkout@v4
         with:
@@ -40,7 +41,7 @@ jobs:
 
       - name: Copy output
         run: |
-          cp -r index.html content docs.geostandaarden.nl/
+          cp -r content/index.html content docs.geostandaarden.nl/
 
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
