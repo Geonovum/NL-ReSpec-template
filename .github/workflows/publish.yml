@@ -28,7 +28,7 @@ jobs:
           rm -f *.md *.html
           mv ~/static/snapshot.html index.html
           mkdir content
-          cp -r index.html data media content/
+          cp -r index.html data media js content/
 
       - name: Extract pubDomain
         id: pubdomain
