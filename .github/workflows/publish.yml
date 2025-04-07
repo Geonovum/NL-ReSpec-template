@@ -47,7 +47,8 @@ jobs:
         run: |
           mkdir -p docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}
           cp -r content/* docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}/
-
+          echo "Inhoud van docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}/"
+          ls -alh docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
