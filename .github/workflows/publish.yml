@@ -7,8 +7,6 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-22.04
-    environment:
-      name: production
     permissions:
       contents: write
       pull-requests: write
