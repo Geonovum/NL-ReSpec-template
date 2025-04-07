@@ -28,7 +28,6 @@ jobs:
         run: |
           rm -f *.md *.html
           mv ~/static/* ./
-          mv snapshot.html index.html
           mkdir content
           shopt -s extglob
           mv !(content) content
