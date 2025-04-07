@@ -26,11 +26,9 @@ jobs:
       - name: Prepare content
         run: |
           rm -f *.md *.html
-          mv ~/static/* ./
-          mv snapshot.html index.html
+          mv ~/static/snapshot.html index.html
           mkdir content
-          shopt -s extglob
-          mv !(content) content
+          cp -r index.html data media content/
 
       - name: Extract pubDomain
         id: pubdomain
