@@ -35,7 +35,7 @@ jobs:
         run: |
           DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]')
           echo "pubdomain=$DOMAIN" >> $GITHUB_OUTPUT
-
+          
       - name: Checkout private docs
         uses: actions/checkout@v4
         with:
