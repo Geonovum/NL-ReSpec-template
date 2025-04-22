@@ -42,8 +42,11 @@ jobs:
           CLEAN_CONFIG=$(sed -E 's://.*$::' "$CONFIG_FILE")
 
           # 1. Parse waarden uit de ge‑cleande config
-          get_value() {
-            echo "$CLEAN_CONFIG" | grep -Po "${1}:\s*\"\K[^\"]+" | tr -d '[:space:]' || true
+          get_value_lower() {
+              echo "$CLEAN_CONFIG" \
+              | grep -Po "${1}:\s*\"\K[^\"]+" \
+              | tr -d '[:space:]' \
+              | tr '[:upper:]' '[:lower:]' || true
           }
           DOMAIN=$(get_value 'pubDomain')
           SPEC_STATUS=$(get_value 'specStatus')
