@@ -82,7 +82,7 @@ jobs:
             exit 1
           fi
 
-          echo "🔍 Gevonden en gevalideerd (allemaal lowercase):"
+          echo "Gevonden en gevalideerd (allemaal lowercase):"
           echo "   pubDomain   = $DOMAIN"
           echo "   specStatus  = $SPEC_STATUS"
           echo "   specType    = $SPEC_TYPE"
@@ -135,9 +135,9 @@ jobs:
 
       - name: Copy output to pubDomain folder
         run: |
-          mkdir -p docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}
-          cp -r content/* docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}/
-          rm -r docs.geostandaarden.nl/${{ steps.pubdomain.outputs.pubdomain }}/js
+          mkdir -p docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}
+          cp -r content/* docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/
+          rm -r docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/js
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
@@ -147,7 +147,9 @@ jobs:
           base: main
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           title: "Automated update from ${{ github.repository }}"
-          body: "Update vanuit workflow voor domein ${{ steps.pubdomain.outputs.pubdomain }}" #folder hieraan toevoegen
+          body: |
+            Update vanuit workflow voor domein **${{ steps.metadata.outputs.pubdomain }}**  
+            **Folder**: `${{ steps.metadata.outputs.folderPath }}`
           labels: automated pr
           delete-branch: true
           reviewers: wilkoquak,fterpstra,lvdbrink
