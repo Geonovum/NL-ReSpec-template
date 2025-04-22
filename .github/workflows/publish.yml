@@ -30,12 +30,68 @@ jobs:
           mkdir content
           cp -r index.html data media js content/
 
-      - name: Extract pubDomain
-        id: pubdomain
+      - name: Extract & validate publishing metadata
+        id: metadata
+        shell: bash
         run: |
-          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]')
-          echo "pubdomain=$DOMAIN" >> $GITHUB_OUTPUT
-          
+          set -euo pipefail
+
+          # 1. Parse waarden uit config.js
+          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+'   content/js/config.js | tr -d '[:space:]' || true)
+          SPEC_STATUS=$(grep -Po 'specStatus:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]' || true)
+          SPEC_TYPE=$(grep -Po 'specType:\s*"\K[^"]+'     content/js/config.js | tr -d '[:space:]' || true)
+          SHORT_NAME=$(grep -Po 'shortName:\s*"\K[^"]+'   content/js/config.js | tr -d '[:space:]' || true)
+          PUBLISH_DATE=$(grep -Po 'publishDate:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]' || true)
+
+          # 1a. Check op ontbrekende waarden
+          MISSING=()
+          for VAR in DOMAIN SPEC_STATUS SPEC_TYPE SHORT_NAME PUBLISH_DATE; do
+            if [ -z "${!VAR}" ]; then
+              MISSING+=("$VAR")
+            fi
+          done
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "::error title=Ontbrekende metadata::De volgende verplichte waarden ontbreken in config.js: ${MISSING[*]}"
+            exit 1
+          fi
+
+          echo "🔍 Gevonden: pubDomain=$DOMAIN, specStatus=$SPEC_STATUS, specType=$SPEC_TYPE, shortName=$SHORT_NAME, publishDate=$PUBLISH_DATE"
+
+          # 2. Download pubDomainList.json indien nog niet aanwezig
+          CONFIG_JSON=pubDomainList.json
+          if [[ ! -f "$CONFIG_JSON" ]]; then
+            curl -sSL \
+              https://raw.githubusercontent.com/Geonovum/respec-utils/master/src/autodeploy/config/pubDomainList.json \
+              -o "$CONFIG_JSON"
+          fi
+
+          # 3. Check of pubDomain bestaat in de Geonovum-list
+          if ! jq -e --arg domain "$DOMAIN" '.Geonovum[] | select(.pubDomain==$domain)' "$CONFIG_JSON" >/dev/null; then
+            echo "::error title=Invalid pubDomain::pubDomain '$DOMAIN' niet gevonden in $CONFIG_JSON"
+            exit 1
+          fi
+
+          # 4. Valideer publishDate-formaat en geldigheid
+          if ! [[ "$PUBLISH_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error title=Invalid publishDate formaat::publishDate '$PUBLISH_DATE' heeft niet het formaat yyyy-MM-dd"
+            exit 1
+          fi
+          if ! date -d "$PUBLISH_DATE" "+%Y-%m-%d" >/dev/null 2>&1; then
+            echo "::error title=Invalid publishDate::publishDate '$PUBLISH_DATE' is geen geldige datum"
+            exit 1
+          fi
+
+          # 5. Bouw de volledige foldernaam en exporteer als output
+          FOLDER_PATH="${DOMAIN}/${SPEC_STATUS}-${SPEC_TYPE}-${SHORT_NAME}-${PUBLISH_DATE}/"
+          echo "folderPath=$FOLDER_PATH"    >> $GITHUB_OUTPUT
+          echo "pubdomain=$DOMAIN"          >> $GITHUB_OUTPUT
+          echo "specStatus=$SPEC_STATUS"    >> $GITHUB_OUTPUT
+          echo "specType=$SPEC_TYPE"        >> $GITHUB_OUTPUT
+          echo "shortName=$SHORT_NAME"      >> $GITHUB_OUTPUT
+          echo "publishDate=$PUBLISH_DATE"  >> $GITHUB_OUTPUT
+
+          echo "✅ Metadata en folder-path gevalideerd en opgeslagen"
+      
       - name: Checkout private docs
         uses: actions/checkout@v4
         with:
@@ -57,7 +113,7 @@ jobs:
           base: main
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           title: "Automated update from ${{ github.repository }}"
-          body: "Update vanuit workflow voor domein ${{ steps.pubdomain.outputs.pubdomain }}"
+          body: "Update vanuit workflow voor domein ${{ steps.pubdomain.outputs.pubdomain }}" #folder hieraan toevoegen
           labels: automated pr
           delete-branch: true
           reviewers: wilkoquak,fterpstra,lvdbrink
