@@ -41,20 +41,22 @@ jobs:
           # 0. Strip alle //‑comments (hele regel of inline)
           CLEAN_CONFIG=$(sed -E 's://.*$::' "$CONFIG_FILE")
 
-          # 1. Parse waarden uit de ge‑cleande config
+          # 1. Helper: haal waarde op en zet om naar lowercase
           get_value_lower() {
-              echo "$CLEAN_CONFIG" \
+            echo "$CLEAN_CONFIG" \
               | grep -Po "${1}:\s*\"\K[^\"]+" \
               | tr -d '[:space:]' \
               | tr '[:upper:]' '[:lower:]' || true
           }
-          DOMAIN=$(get_value 'pubDomain')
-          SPEC_STATUS=$(get_value 'specStatus')
-          SPEC_TYPE=$(get_value 'specType')
-          SHORT_NAME=$(get_value 'shortName')
-          PUBLISH_DATE=$(get_value 'publishDate')
 
-          # 1a. Check op ontbrekende waarden
+          # 2. Parse + lowercase
+          DOMAIN=$(get_value_lower 'pubDomain')
+          SPEC_STATUS=$(get_value_lower 'specStatus')
+          SPEC_TYPE=$(get_value_lower 'specType')
+          SHORT_NAME=$(get_value_lower 'shortName')
+          PUBLISH_DATE=$(get_value_lower 'publishDate')
+
+          # 3. Check op ontbrekende waarden
           MISSING=()
           for VAR in DOMAIN SPEC_STATUS SPEC_TYPE SHORT_NAME PUBLISH_DATE; do
             if [ -z "${!VAR}" ]; then
@@ -66,23 +68,28 @@ jobs:
             exit 1
           fi
 
-          # 1b. Valideer specStatus tegen toegestane waarden
+          # 4. Valideer specStatus tegen toegestane waarden
           ALLOWED_STATUS=(wv cv vv def ld basis)
           if [[ ! " ${ALLOWED_STATUS[*]} " =~ " $SPEC_STATUS " ]]; then
             echo "::error title=Invalid specStatus::$SPEC_STATUS is geen geldige specStatus. Mogelijke waarden: ${ALLOWED_STATUS[*]}"
             exit 1
           fi
 
-          # 1c. Valideer specType tegen toegestane waarden
+          # 5. Valideer specType tegen toegestane waarden
           ALLOWED_TYPES=(no st im pr hr wa al bd bp)
           if [[ ! " ${ALLOWED_TYPES[*]} " =~ " $SPEC_TYPE " ]]; then
             echo "::error title=Invalid specType::$SPEC_TYPE is geen geldige specType. Mogelijke waarden: ${ALLOWED_TYPES[*]}"
             exit 1
           fi
 
-          echo "Gevonden en gevalideerd: pubDomain=$DOMAIN, specStatus=$SPEC_STATUS, specType=$SPEC_TYPE, shortName=$SHORT_NAME, publishDate=$PUBLISH_DATE"
+          echo "🔍 Gevonden en gevalideerd (allemaal lowercase):"
+          echo "   pubDomain   = $DOMAIN"
+          echo "   specStatus  = $SPEC_STATUS"
+          echo "   specType    = $SPEC_TYPE"
+          echo "   shortName   = $SHORT_NAME"
+          echo "   publishDate = $PUBLISH_DATE"
 
-          # 2. Download pubDomainList.json indien nog niet aanwezig
+          # 6. Download pubDomainList.json indien nog niet aanwezig
           CONFIG_JSON=pubDomainList.json
           if [[ ! -f "$CONFIG_JSON" ]]; then
             curl -sSL \
@@ -90,13 +97,15 @@ jobs:
               -o "$CONFIG_JSON"
           fi
 
-          # 3. Check of pubDomain bestaat in de Geonovum-list
-          if ! jq -e --arg domain "$DOMAIN" '.Geonovum[] | select(.pubDomain==$domain)' "$CONFIG_JSON" >/dev/null; then
+          # 7. Check of pubDomain bestaat in de Geonovum-list (case‑insensitive)
+          if ! jq -e --arg domain "$DOMAIN" \
+              '.Geonovum[] | select((.pubDomain|ascii_downcase)==$domain)' \
+              "$CONFIG_JSON" >/dev/null; then
             echo "::error title=Invalid pubDomain::pubDomain '$DOMAIN' niet gevonden in $CONFIG_JSON"
             exit 1
           fi
 
-          # 4. Valideer publishDate-formaat en geldigheid
+          # 8. Valideer publishDate-formaat en geldigheid
           if ! [[ "$PUBLISH_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
             echo "::error title=Invalid publishDate formaat::publishDate '$PUBLISH_DATE' heeft niet het formaat yyyy-MM-dd"
             exit 1
@@ -106,7 +115,7 @@ jobs:
             exit 1
           fi
 
-          # 5. Bouw de volledige foldernaam en exporteer als output
+          # 9. Bouw de folder-path en exporteer als output
           FOLDER_PATH="${DOMAIN}/${SPEC_STATUS}-${SPEC_TYPE}-${SHORT_NAME}-${PUBLISH_DATE}/"
           echo "folderPath=$FOLDER_PATH"    >> $GITHUB_OUTPUT
           echo "pubdomain=$DOMAIN"          >> $GITHUB_OUTPUT
@@ -116,7 +125,6 @@ jobs:
           echo "publishDate=$PUBLISH_DATE"  >> $GITHUB_OUTPUT
 
           echo "Metadata en folder-path gevalideerd en opgeslagen"
-      
 
       - name: Checkout private docs
         uses: actions/checkout@v4
