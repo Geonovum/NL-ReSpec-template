@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
 
           # 1. Parse waarden uit config.js
-          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+'   content/js/config.js | tr -d '[:space:]' || true)
+          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+'     content/js/config.js | tr -d '[:space:]' || true)
           SPEC_STATUS=$(grep -Po 'specStatus:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]' || true)
           SPEC_TYPE=$(grep -Po 'specType:\s*"\K[^"]+'     content/js/config.js | tr -d '[:space:]' || true)
           SHORT_NAME=$(grep -Po 'shortName:\s*"\K[^"]+'   content/js/config.js | tr -d '[:space:]' || true)
@@ -55,7 +55,21 @@ jobs:
             exit 1
           fi
 
-          echo "🔍 Gevonden: pubDomain=$DOMAIN, specStatus=$SPEC_STATUS, specType=$SPEC_TYPE, shortName=$SHORT_NAME, publishDate=$PUBLISH_DATE"
+          # 1b. Valideer specStatus tegen toegestane waarden
+          ALLOWED_STATUS=(wv cv vv def ld basis)
+          if [[ ! " ${ALLOWED_STATUS[*]} " =~ " $SPEC_STATUS " ]]; then
+            echo "::error title=Invalid specStatus::$SPEC_STATUS is geen geldige specStatus. Mogelijke waarden: ${ALLOWED_STATUS[*]}"
+            exit 1
+          fi
+
+          # 1c. Valideer specType tegen toegestane waarden
+          ALLOWED_TYPES=(no st im pr hr wa al bd bp)
+          if [[ ! " ${ALLOWED_TYPES[*]} " =~ " $SPEC_TYPE " ]]; then
+            echo "::error title=Invalid specType::$SPEC_TYPE is geen geldige specType. Mogelijke waarden: ${ALLOWED_TYPES[*]}"
+            exit 1
+          fi
+
+          echo "Gevonden en gevalideerd: pubDomain=$DOMAIN, specStatus=$SPEC_STATUS, specType=$SPEC_TYPE, shortName=$SHORT_NAME, publishDate=$PUBLISH_DATE"
 
           # 2. Download pubDomainList.json indien nog niet aanwezig
           CONFIG_JSON=pubDomainList.json
@@ -90,8 +104,8 @@ jobs:
           echo "shortName=$SHORT_NAME"      >> $GITHUB_OUTPUT
           echo "publishDate=$PUBLISH_DATE"  >> $GITHUB_OUTPUT
 
-          echo "✅ Metadata en folder-path gevalideerd en opgeslagen"
-      
+          echo "Metadata en folder-path gevalideerd en opgeslagen"
+
       - name: Checkout private docs
         uses: actions/checkout@v4
         with:
