@@ -36,12 +36,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 1. Parse waarden uit config.js
-          DOMAIN=$(grep -Po 'pubDomain:\s*"\K[^"]+'     content/js/config.js | tr -d '[:space:]' || true)
-          SPEC_STATUS=$(grep -Po 'specStatus:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]' || true)
-          SPEC_TYPE=$(grep -Po 'specType:\s*"\K[^"]+'     content/js/config.js | tr -d '[:space:]' || true)
-          SHORT_NAME=$(grep -Po 'shortName:\s*"\K[^"]+'   content/js/config.js | tr -d '[:space:]' || true)
-          PUBLISH_DATE=$(grep -Po 'publishDate:\s*"\K[^"]+' content/js/config.js | tr -d '[:space:]' || true)
+          CONFIG_FILE=content/js/config.js
+
+          # 0. Strip alle //‑comments (hele regel of inline)
+          CLEAN_CONFIG=$(sed -E 's://.*$::' "$CONFIG_FILE")
+
+          # 1. Parse waarden uit de ge‑cleande config
+          get_value() {
+            echo "$CLEAN_CONFIG" | grep -Po "${1}:\s*\"\K[^\"]+" | tr -d '[:space:]' || true
+          }
+          DOMAIN=$(get_value 'pubDomain')
+          SPEC_STATUS=$(get_value 'specStatus')
+          SPEC_TYPE=$(get_value 'specType')
+          SHORT_NAME=$(get_value 'shortName')
+          PUBLISH_DATE=$(get_value 'publishDate')
 
           # 1a. Check op ontbrekende waarden
           MISSING=()
@@ -105,6 +113,7 @@ jobs:
           echo "publishDate=$PUBLISH_DATE"  >> $GITHUB_OUTPUT
 
           echo "Metadata en folder-path gevalideerd en opgeslagen"
+      
 
       - name: Checkout private docs
         uses: actions/checkout@v4
