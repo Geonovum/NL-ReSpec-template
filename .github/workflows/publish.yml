@@ -28,7 +28,7 @@ jobs:
           rm -f *.md *.html
           mv ~/static/snapshot.html index.html
           mkdir content
-          cp -r index.html data media js content/
+          cp -r index.html data media js css content/
 
       - name: Extract & validate publishing metadata
         id: metadata
@@ -137,7 +137,7 @@ jobs:
         run: |
           mkdir -p docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}
           cp -r content/* docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/
-          rm -r docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/js
+          rm docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/js/config.js
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
