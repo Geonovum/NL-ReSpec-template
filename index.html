@@ -10,18 +10,23 @@
   <script class="remove">
     const mergedLocalBiblio = {
       ...organisationConfig.localBiblio,
-      ...documentConfig.localBiblio
+      ...respecConfig.localBiblio
     };
     respecConfig = {
       ...organisationConfig,
-      ...documentConfig,
+      ...respecConfig,
       localBiblio: mergedLocalBiblio
     };
   </script>
-  <script>document.title = respecConfig.title</script>
+
   <title>TODO: Vul hier de titel in</title>
+  <script>document.title = respecConfig.title</script>
+
+  <!-- TODO: Als je een ander logot wilt kun je dat hier aanpassen. -->
   <link rel="shortcut icon" type="image/x-icon" href="https://tools.geostandaarden.nl/respec/style/logos/Geonovum.ico" />
+
   <script src="https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js" class="remove" async></script>
+
   <!-- De volgende regel zorgt ervoor dat plaatjes uit Imvertor niet geschaald
        worden, zodat de imagemap die op deze plaatjes zit werkt. -->
   <style>div.imageinfo img {max-width: none;}</style>
