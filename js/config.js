@@ -1,8 +1,8 @@
 let respecConfig = {
   useLogo: true,
   useLabel: true,
-  // title is verplicht! Neem hier de titel van het document op ----------------------
-  title: "[TODO: Neem titel op in config.js]",
+  // TODO: title is verplicht! Neem hieronder de titel van het document op
+  title: "Geonovum template voor ReSpec",
   //-- specStatus is verplicht! (activeer 1 van de volgende) --------------------------
   specStatus: "wv",                   // Werkversie
   //specStatus: "cv",               // Consultatieversie
@@ -35,7 +35,7 @@ let respecConfig = {
 
   //-- publishDate is verplicht -------------------------------------------------------
   //-- NB: in de werkversie uitzetten, want dan pakt Respec de pushdate ---------------
-  publishDate: "2025-03-28",
+  //publishDate: "2025-03-28",
   //eventueel is het mogelijk een versienummer mee te geven, maar bij Geonovum werken we gewoonlijk alleen met datum als onderdeel van de permanente URI.
   //publishVersion: "0.0.2",
   //previousVersion: "0.0.1",
