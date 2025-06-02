@@ -54,3 +54,12 @@ jobs:
           git add static/*
           git commit -m "Snapshot gegenereerd" || echo "No changes to commit"
           git push
+
+      - name: Upload snapshot.html as artefact
+        if: ${{ steps.config.outputs.grep == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-files
+          path: |
+            static/snapshot.html
+            static/*.pdf
