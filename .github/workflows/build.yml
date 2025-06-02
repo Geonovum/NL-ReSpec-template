@@ -42,3 +42,8 @@ jobs:
           node pdf.js      
           find *.pdf
           mv *.pdf ~/static/
+      - name: Commit snapshot + PDF
+        if: ${{ steps.config.outputs.grep == 'true' }}
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'PDF gegenereerd vanuit alternateFormats'
