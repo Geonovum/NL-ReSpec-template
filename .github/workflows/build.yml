@@ -6,24 +6,24 @@ jobs:
     name: Snapshot
     runs-on: ubuntu-22.04
     steps:
-      - run: mkdir ~/static
-      - name: Create cache
-        uses: actions/cache@v4
-        with:
-          path: ~/static
-          key: snapshot-${{ github.sha }}
       - uses: actions/checkout@v4
+      - name: Maak 'static' map in de repo‐root
+        run: |
+          mkdir -p static
+
       - name: Static HTML
         run: |
-          npx respec --localhost --src index.html --out ~/static/snapshot.html
+          npx respec --localhost --src index.html --out static/snapshot.html
+
       - name: Check config
         id: config
-        if: ${{ github.event_name == 'push'}}
+        if: ${{ github.event_name == 'push' }}
         run: |
           echo "grep=false" >> $GITHUB_OUTPUT
           if grep -q alternateFormats ./js/config.js; then
-          echo "grep=true" >> $GITHUB_OUTPUT
+            echo "grep=true" >> $GITHUB_OUTPUT
           fi
+
       - name: Copy pdf.js
         if: ${{ steps.config.outputs.grep == 'true' }}
         run: |
@@ -35,21 +35,22 @@ jobs:
           cp ./js/config.js config.js
           echo "module.exports = { respecConfig };" >> config.js
           echo "var window = {respecMermaid : {createFigures : null}};" | cat - config.js > temp && mv temp config.js
-          cp ~/static/snapshot.html snapshot.html
+          cp static/snapshot.html snapshot.html
           npm i puppeteer
           python3 -m http.server 8080 &
           rm -f *.pdf
           node pdf.js      
           find *.pdf
-          mv *.pdf ~/static/
+          mv *.pdf static/
+
       - name: Configure Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit snapshot + PDF
+      - name: Commit snapshot
         if: ${{ steps.config.outputs.grep == 'true' }}
         run: |
-          git add ~/static/*
+          git add static/*
           git commit -m "Snapshot gegenereerd" || echo "No changes to commit"
           git push
