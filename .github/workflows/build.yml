@@ -18,7 +18,7 @@ jobs:
       - name: Validate HTML with W3C
         run: |
           npm install -g nu-html-checker
-          nu-html-checker ~/static/snapshot.html
+          nu-html-checker static/snapshot.html
 
       - name: Check config
         id: config
