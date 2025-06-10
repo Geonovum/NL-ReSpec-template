@@ -14,6 +14,11 @@ jobs:
       - name: Static HTML
         run: |
           npx respec --localhost --src index.html --out static/snapshot.html
+      
+      - name: Validate HTML with W3C
+        run: |
+          npm install -g nu-html-checker
+          nu-html-checker ~/static/snapshot.html
 
       - name: Check config
         id: config
