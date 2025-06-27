@@ -13,12 +13,12 @@ jobs:
 
       - name: Static HTML
         run: |
-          npx respec --localhost --src index.html --out static/snapshot.html
+          npx respec --localhost --src index.html --out snapshot.html
       
       - name: Validate HTML with W3C
         run: |
           npm install -g nu-html-checker
-          nu-html-checker static/snapshot.html
+          nu-html-checker snapshot.html
 
       - name: Check config
         id: config
@@ -40,7 +40,6 @@ jobs:
           cp ./js/config.js config.js
           echo "module.exports = { respecConfig };" >> config.js
           echo "var window = {respecMermaid : {createFigures : null}};" | cat - config.js > temp && mv temp config.js
-          cp static/snapshot.html snapshot.html
           npm i puppeteer
           python3 -m http.server 8080 &
           rm -f *.pdf
@@ -56,7 +55,7 @@ jobs:
       - name: Commit snapshot
         if: ${{ steps.config.outputs.grep == 'true' }}
         run: |
-          git add static/*
+          git add snapshot.html static/*
           git commit -m "Snapshot gegenereerd" || echo "No changes to commit"
           git push
 
@@ -66,5 +65,5 @@ jobs:
         with:
           name: snapshot-files
           path: |
-            static/snapshot.html
+            snapshot.html
             static/*.pdf

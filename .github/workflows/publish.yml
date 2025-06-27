@@ -138,13 +138,22 @@ jobs:
           mkdir -p docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}
           cp -r content/* docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/
           rm docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/js/config.js
+      - name: Bepaal doelbranch voor PR
+        id: branch
+        run: |
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            echo "branch=develop" >> $GITHUB_OUTPUT
+          else
+            echo "branch=main" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create PR
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_PUSH_TOKEN }}
           path: docs.geostandaarden.nl
           branch: auto-update-${{ github.run_id }}
-          base: main
+          base: ${{ steps.branch.outputs.branch }}
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           title: "Automated update from ${{ github.repository }}"
           body: |
