@@ -22,7 +22,6 @@ jobs:
 
       - name: Check config
         id: config
-        if: ${{ github.event_name == 'push' || github.event_name == 'release' }}
         run: |
           echo "grep=false" >> $GITHUB_OUTPUT
           if grep -q alternateFormats ./js/config.js; then
@@ -53,14 +52,14 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Commit snapshot
-        if: ${{ steps.config.outputs.grep == 'true' }}
+        if: ${{ github.event_name == 'push' && steps.config.outputs.grep == 'true' }}
         run: |
           git add snapshot.html static/*
           git commit -m "Snapshot gegenereerd" || echo "No changes to commit"
           git push
 
       - name: Upload snapshot.html as artefact
-        if: ${{ steps.config.outputs.grep == 'true' }}
+        if: ${{ github.event_name == 'push' }}
         uses: actions/upload-artifact@v4
         with:
           name: snapshot-files
