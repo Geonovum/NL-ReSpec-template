@@ -11,8 +11,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: snapshot-files
-          path: ./static
-      - run: mv static/snapshot.html snapshot.html
+          path: .
       - run: npm install -g pa11y
       - run: pa11y snapshot.html --ignore WCAG2AA.Principle4.Guideline4_1.4_1_1.F77
 
