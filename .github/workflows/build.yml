@@ -22,7 +22,7 @@ jobs:
 
       - name: Check config
         id: config
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' || github.event_name == 'release' }}
         run: |
           echo "grep=false" >> $GITHUB_OUTPUT
           if grep -q alternateFormats ./js/config.js; then
