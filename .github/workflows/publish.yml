@@ -21,14 +21,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: snapshot-files
-          path: .
+          path: ./artifact
 
       - name: Prepare content
         run: |
           rm -f *.md *.html
-          mv snapshot.html index.html
+          mv artifact/snapshot.html index.html
           mkdir content
-          cp -r index.html data media js css content/
+          cp index.html content/
+
+          for dir in data media js css; do
+            if [ -d "$dir" ]; then
+              cp -r "$dir" content/
+            else
+              echo "Directory '$dir' bestaat niet, wordt overgeslagen."
+            fi
+          done
+      
 
       - name: Extract & validate publishing metadata
         id: metadata
