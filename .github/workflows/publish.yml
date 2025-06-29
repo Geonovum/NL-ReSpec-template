@@ -164,10 +164,11 @@ jobs:
           branch: auto-update-${{ github.run_id }}
           base: ${{ steps.branch.outputs.branch }}
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-          title: "Automated update from ${{ github.repository }}"
+          title: "Automated update from ${{ github.repository }} to ${{ steps.branch.outputs.branch }}"
           body: |
-            Update vanuit workflow voor domein **${{ steps.metadata.outputs.pubdomain }}**  
-            **Folder**: `${{ steps.metadata.outputs.folderPath }}`
+            Update vanuit workflow voor domein ${{ steps.metadata.outputs.pubdomain }}  
+            Folder: `${{ steps.metadata.outputs.folderPath }}`
+            To branch: `${{ steps.branch.outputs.branch }}`
           labels: automated pr
           delete-branch: true
           reviewers: wilkoquak,fterpstra,lvdbrink
