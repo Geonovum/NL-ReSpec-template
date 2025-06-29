@@ -26,7 +26,7 @@ jobs:
       - name: Prepare content
         run: |
           rm -f *.md *.html
-          mv ~/static/snapshot.html index.html
+          mv snapshot.html index.html
           mkdir content
           cp -r index.html data media js css content/
 
