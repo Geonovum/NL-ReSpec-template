@@ -37,7 +37,6 @@ jobs:
               echo "Directory '$dir' bestaat niet, wordt overgeslagen."
             fi
           done
-      
 
       - name: Extract & validate publishing metadata
         id: metadata
@@ -64,7 +63,12 @@ jobs:
           SPEC_TYPE=$(get_value_lower 'specType')
           SHORT_NAME=$(get_value_lower 'shortName')
           PUBLISH_DATE=$(get_value_lower 'publishDate')
-
+          
+          if [[ "$SPEC_STATUS" == "wv" ]]; then
+            echo "::error title=Ongeldige status voor publicatie::Document met status 'wv' (Werkversie) mag niet gepubliceerd worden."
+            exit 1
+          fi
+          
           # 3. Check op ontbrekende waarden
           MISSING=()
           for VAR in DOMAIN SPEC_STATUS SPEC_TYPE SHORT_NAME PUBLISH_DATE; do
@@ -147,28 +151,31 @@ jobs:
           mkdir -p docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}
           cp -r content/* docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/
           rm docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/js/config.js
-      - name: Bepaal doelbranch voor PR
-        id: branch
+      - name: Push naar develop bij pre-release
+        if: ${{ github.event.release.prerelease == true }}
         run: |
-          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
-            echo "branch=develop" >> $GITHUB_OUTPUT
-          else
-            echo "branch=main" >> $GITHUB_OUTPUT
-          fi
+          cd docs.geostandaarden.nl
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git checkout develop || git checkout -b develop origin/develop
+          git add .
+          git commit -m "Automatische pre-release update van ${{ github.repository }}"
+          git push origin develop
 
-      - name: Create PR
+      - name: Create PR naar main bij release
+        if: ${{ github.event.release.prerelease != true }}
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_PUSH_TOKEN }}
           path: docs.geostandaarden.nl
           branch: auto-update-${{ github.run_id }}
-          base: ${{ steps.branch.outputs.branch }}
+          base: main
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
-          title: "Automated update from ${{ github.repository }} to ${{ steps.branch.outputs.branch }}"
+          title: "Automated update from ${{ github.repository }} to main"
           body: |
             Update vanuit workflow voor domein ${{ steps.metadata.outputs.pubdomain }}  
             Folder: `${{ steps.metadata.outputs.folderPath }}`
-            To branch: `${{ steps.branch.outputs.branch }}`
+            To branch: `main`
           labels: automated pr
           delete-branch: true
           reviewers: wilkoquak,fterpstra,lvdbrink
