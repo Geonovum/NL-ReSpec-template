@@ -8,7 +8,7 @@ De dynamische voorbeeldpagina van het template is [hier te bekijken](https://geo
 
 ## Starten
 
-Gebruik de knop [*Use this template*](https://github.com/Geonovum/NL-ReSpec-template/generate?description=Geonovum+documenttemplate) om een nieuwe repository aan te maken:
+Gebruik de knop [*Gebruik deze template*](https://github.com/Geonovum/NL-ReSpec-template/generate?description=Geonovum+documenttemplate) om een nieuwe repository aan te maken:
 
 * **Owner:** kies `Geonovum` als je daar rechten voor hebt.
 * **Visibility:** kies **Public**.
@@ -26,9 +26,8 @@ Voor het aanpassen van het document raden we aan om een IDE te gebruiken, zoals 
 
 ### Aanpassen van content
 
-* Pas instellingen aan in de configuratiebestanden (`config.js`, `organisation-config.js`)
+* Pas instellingen aan in de configuratiebestanden (`config.js`)
 * Voeg markdown-bestanden toe of wijzig bestaande bestanden
-* Plaatsen die ingevuld moeten worden zijn gemarkeerd met `TODO:`
 
 ### Configuratiebestanden
 
@@ -60,7 +59,7 @@ Meer info: [ReSpec documentatie](https://respec.org/docs/#css-classes)
 
 ## Automatische checks en build
 
-De GitHub Actions workflow draait automatisch bij iedere commit op `main`, `develop` of bij een GitHub Release. Daarbij gebeuren de volgende stappen:
+De GitHub Actions workflow draait automatisch bij iedere commit of bij een GitHub Release. Daarbij gebeuren de volgende stappen:
 
 1. HTML wordt gegenereerd met [ReSpec](https://respec.org/)
 2. (optioneel) PDF wordt gegenereerd — indien `alternateFormats` is ingesteld in `config.js`:
@@ -91,9 +90,9 @@ Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 ### Pre-release (testomgeving)
 
 * Ga naar het tabblad **Releases** in je eigen repo
-* Klik op **“Draft a new release”**
-* Geef een versienummer (bijv. `v0.1.0`)
-* **Vink aan:** “This is a pre-release”
+* Klik op **“Create a new release”**
+* Geef een tag aan bij, Choose a tag (bijv. `v0.1.0`) en klik op **“Create new tag”**
+* **Vink aan:** “This is a pre-release” onderop deze pagina
 * Klik op **“Publish release”**
 
 💡 Dit publiceert je document automatisch op:
@@ -104,8 +103,8 @@ Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 ### Release (productieomgeving)
 
 * Ga opnieuw naar **Releases**
-* Klik op **“Draft a new release”**
-* Kies een nieuwe versie (bijv. `v1.0.0`)
+* Klik op **“Create a new release”**
+* Geef een tag aan bij, Choose a tag (bijv. `v0.1.0`) en klik op **“Create new tag”**
 * Laat “pre-release” uitgevinkt
 * Klik op **“Publish release”**
 
