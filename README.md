@@ -96,7 +96,7 @@ Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 * Klik op **“Publish release”**
 
 💡 Dit publiceert je document automatisch op:
-`https://test.docs.geostandaarden.nl/
+https://test.docs.geostandaarden.nl/
 
 (De exacte URL wordt bepaald door waarden in `config.js`)
 
@@ -112,4 +112,4 @@ Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 [`Geonovum/docs.geostandaarden.nl`](https://github.com/Geonovum/docs.geostandaarden.nl/pulls)
 
 Na goedkeuring van de PR wordt het document gepubliceerd op:
-`https://docs.geostandaarden.nl/
+https://docs.geostandaarden.nl/
