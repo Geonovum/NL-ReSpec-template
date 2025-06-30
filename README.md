@@ -2,6 +2,11 @@
 
 ReSpec is een tool om html en pdf documenten te genereren op basis van markdown content.
 
+### Vereiste voor gebruik
+- Kennis van git/github
+- Kennis van markdown en/of HTML
+- Een webserver om de documentatie te hosten
+
 ## Starten
 
 Gebruik de knop [*Use this template*](https://github.com/Geonovum/NL-ReSpec-template/generate?description=Geonovum+documenttemplate) om een nieuwe repository aan te maken:
