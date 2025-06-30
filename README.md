@@ -1,11 +1,10 @@
 ## ReSpec template instructies
 
-ReSpec is een tool om html en pdf documenten te genereren op basis van markdown content.
+ReSpec is een tool om HTML- en PDF-documenten te genereren op basis van markdowncontent. Deze template helpt je bij het opstellen en publiceren van documenten volgens de Geonovum-standaard.
 
-### Vereiste voor gebruik
-- Kennis van git/github
-- Kennis van markdown en/of HTML
-- Een webserver om de documentatie te hosten
+De dynamische voorbeeldpagina van het template is [hier te bekijken](https://geonovum.github.io/NL-ReSpec-GN-template/).
+
+---
 
 ## Starten
 
@@ -21,54 +20,97 @@ Gebruik de knop [*Use this template*](https://github.com/Geonovum/NL-ReSpec-temp
 
 ---
 
+## Gebruikersinstructie
+
+Voor het aanpassen van het document raden we aan om een IDE te gebruiken, zoals [Visual Studio Code](https://code.visualstudio.com/). Deze geeft een voorbeeldweergave van je markdown en helpt bij het beheren van je bestanden.
+
+### Aanpassen van content
+
+* Pas instellingen aan in de configuratiebestanden (`config.js`, `organisation-config.js`)
+* Voeg markdown-bestanden toe of wijzig bestaande bestanden
+* Plaatsen die ingevuld moeten worden zijn gemarkeerd met `TODO:`
+
+### Configuratiebestanden
+
+* [`js/config.js`](js/config.js): bevat document-specifieke instellingen zoals titel, status en auteurs
+* [`organisation-config.js`](https://tools.geostandaarden.nl/respec/config/geonovum-config.js): bevat algemene informatie over de organisatie
+
+Beide bestanden worden gelinkt in de [`index.html`](index.html)
+
+### Content schrijven
+
+* Gebruik markdown of HTML
+* Splits content idealiter per hoofdstuk in losse bestanden
+* Voeg nieuwe secties toe aan de `index.html` via `data-include`:
+
+```html
+<section data-include-format="markdown" data-include="ch01.md" class="informative"></section>
+<section data-include-format="markdown" data-include="ch02.md"></section>
+```
+
+CSS-classes zijn ook bruikbaar in markdown via HTML:
+
+```html
+<div class="example">voorbeeld</div>
+```
+
+Meer info: [ReSpec documentatie](https://respec.org/docs/#css-classes)
+
+---
+
+## Automatische checks en build
+
+De GitHub Actions workflow draait automatisch bij iedere commit op `main`, `develop` of bij een GitHub Release. Daarbij gebeuren de volgende stappen:
+
+1. HTML wordt gegenereerd met [ReSpec](https://respec.org/)
+2. (optioneel) PDF wordt gegenereerd — indien `alternateFormats` is ingesteld in `config.js`:
+
+```js
+alternateFormats: [
+  {
+    label: "pdf",
+    uri: "template.pdf",
+  },
+]
+```
+
+3. Automatische controles worden uitgevoerd:
+
+    * HTML-validatie
+    * WCAG-check (toegankelijkheid)
+    * Linkcheck (controleren van verwijzingen)
+
+De resultaten zijn zichtbaar in het tabblad **Actions** van je repository.
+
+---
+
 ## Publiceren van documenten
 
-Zodra je content klaar is, kun je publiceren via een **GitHub release**:
+Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 
 ### Pre-release (testomgeving)
 
-* Ga in je eigen repository naar het tabblad **“Releases”**
+* Ga naar het tabblad **Releases** in je eigen repo
 * Klik op **“Draft a new release”**
-* Kies een versienummer (bijv. `v0.1.0`)
+* Geef een versienummer (bijv. `v0.1.0`)
 * **Vink aan:** “This is a pre-release”
 * Klik op **“Publish release”**
 
-Deze actie:
+💡 Dit publiceert je document automatisch op:
+`https://test.docs.geostandaarden.nl/
 
-* Genereert automatisch een nieuwe versie van het document
-* Publiceert het naar:
-  `https://test.docs.geostandaarden.nl/`
-
-(De exacte URL wordt afgeleid van `config.js`.)
-
----
+(De exacte URL wordt bepaald door waarden in `config.js`)
 
 ### Release (productieomgeving)
 
-* Ga opnieuw naar het tabblad **“Releases”**
+* Ga opnieuw naar **Releases**
 * Klik op **“Draft a new release”**
-* Kies een nieuwe versienaam (bijv. `v1.0.0`)
-* **Laat “pre-release” uitgevinkt**
+* Kies een nieuwe versie (bijv. `v1.0.0`)
+* Laat “pre-release” uitgevinkt
 * Klik op **“Publish release”**
 
-Deze actie:
+💡 Dit maakt automatisch een **Pull Request** aan naar:
+[`Geonovum/docs.geostandaarden.nl`](https://github.com/Geonovum/docs.geostandaarden.nl/pulls)
 
-* Maakt een **Pull Request aan** naar [`Geonovum/docs.geostandaarden.nl`](https://github.com/Geonovum/docs.geostandaarden.nl/pulls)
-* Zodra die PR wordt **gemerged**, wordt je document zichtbaar op:
-  `https://docs.geostandaarden.nl/`
-
----
-
-## Wat wordt automatisch gegenereerd & gecontroleerd?
-
-Bij iedere wijziging aan de `main` of `develop` branch:
-
-1. **HTML** wordt gegenereerd met [ReSpec](https://respec.org/)
-2. Indien geconfigureerd, wordt er ook een **PDF** gegenereerd
-3. De volgende automatische checks draaien:
-
-   * HTML-validatie (W3C)
-   * WCAG toegankelijkheidscontrole (via [pa11y](https://github.com/pa11y/pa11y))
-   * Linkcontrole (verwijzingen binnen het document)
-
----
+Na goedkeuring van de PR wordt het document gepubliceerd op:
+`https://docs.geostandaarden.nl/
