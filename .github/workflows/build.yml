@@ -54,9 +54,17 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Commit snapshot
-        if: ${{ github.event_name == 'push' && steps.config.outputs.grep == 'true' }}
+        if: ${{ github.event_name == 'push' }}
         run: |
-          git add snapshot.html static/*
+          # Voeg altijd de HTML toe
+          git add snapshot.html
+
+          # Als alternateFormats aanwezig is *én* er een PDF in static/, voeg 'm toe
+          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls static/*.pdf 1> /dev/null 2>&1; then
+            git add static/*.pdf
+          fi
+
+          # Commit en push, maar break niet af als er niks te committen is
           git commit -m "Snapshot gegenereerd" || echo "No changes to commit"
           git push
 
@@ -65,6 +73,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: snapshot-files
-          path: |
-            snapshot.html
-            static/*.pdf
+          path: snapshot.html
+
+      - name: Upload generated PDFs as artefact
+        if: ${{ steps.config.outputs.grep == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-files
+          path: static/*.pdf
+
