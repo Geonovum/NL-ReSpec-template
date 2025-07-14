@@ -24,8 +24,10 @@ jobs:
         id: config
         run: |
           echo "grep=false" >> $GITHUB_OUTPUT
-          if grep -q alternateFormats ./js/config.js; then
-            echo "grep=true" >> $GITHUB_OUTPUT
+          if grep -q 'alternateFormats' ./js/config.js; then
+            if grep -Pzoq 'alternateFormats:\s*\[\s*\{\s*label:\s*".+?",\s*uri:\s*".+?"\s*\}\s*\]' ./js/config.js; then
+              echo "grep=true" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Copy pdf.js
