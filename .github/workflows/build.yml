@@ -111,7 +111,7 @@ jobs:
 
       - name: Wait for server readiness
         run: |
-          sleep 5
+          sleep 10
           curl --fail http://localhost:8080/snapshot.html
 
       - name: Install muffet
