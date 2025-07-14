@@ -3,7 +3,7 @@ on:
   workflow_call:
 jobs:
   snapshot:
-    name: Generate & Commit Snapshot
+    name: Generate Snapshot
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -46,30 +46,36 @@ jobs:
           node pdf.js
           mv *.pdf static/
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Commit snapshot & PDFs
         if: ${{ github.event_name == 'push' }}
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add snapshot.html
-          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls static/*.pdf 1> /dev/null 2>&1; then
+          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls static/*.pdf 1>/dev/null 2>&1; then
             git add static/*.pdf
           fi
           git commit -m "Snapshot gegenereerd" || echo "No changes to commit"
           git push
+
+      - name: Upload snapshot artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot
+          path: |
+            snapshot.html
+            static/*.pdf
 
   wcag:
     name: WCAG Accessibility Check
     needs: snapshot
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout latest commit
-        uses: actions/checkout@v4
+      - name: Download snapshot artifact
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 1
+          name: snapshot
+          path: .
 
       - name: Install pa11y
         run: npm install -g pa11y
@@ -84,10 +90,11 @@ jobs:
     needs: snapshot
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout latest commit
-        uses: actions/checkout@v4
+      - name: Download snapshot artifact
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 1
+          name: snapshot
+          path: .
 
       - name: Serve snapshot over HTTP
         uses: Eun/http-server-action@v1
@@ -114,18 +121,18 @@ jobs:
           sleep 10
           curl --fail http://localhost:8080/snapshot.html
 
-      - name: Install muffet
+      - name: Install Muffet via Go
         run: |
           sudo apt-get update
           sudo apt-get install -y golang-go
           go install github.com/raviqqe/muffet@latest
           echo "${HOME}/go/bin" >> $GITHUB_PATH
 
-      - name: Check links with muffet
+      - name: Check links with Muffet
         run: |
           muffet \
-            --exclude '8080\/\S*\.pdf' \
-            --exclude '^https:\/\/gitdocumentatie.*' \
+            --exclude '8080\\/\S*\\.pdf' \
+            --exclude '^https:\\/\\/gitdocumentatie.*' \
             --header 'user-agent:Curl' \
             --ignore-fragments \
             --one-page-only \
