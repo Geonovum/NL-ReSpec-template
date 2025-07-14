@@ -131,9 +131,9 @@ jobs:
       - name: Check links with Muffet
         run: |
           muffet \
-            --exclude '8080\\/\S*\\.pdf' \
-            --exclude '^https:\\/\\/gitdocumentatie.*' \
-            --exclude '^http:\\/\\/localhost:8080/*' \
+            --exclude '8080\/\S*\.pdf' \
+            --exclude '^https://gitdocumentatie.*' \
+            --exclude '^http://localhost:8080/.*' \
             --header 'user-agent:Curl' \
             --ignore-fragments \
             --one-page-only \
