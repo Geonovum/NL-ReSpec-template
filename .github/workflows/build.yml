@@ -65,6 +65,8 @@ jobs:
           path: |
             snapshot.html
             static/*.pdf
+            media/**/*
+            js/**/*
 
   wcag:
     name: WCAG Accessibility Check
