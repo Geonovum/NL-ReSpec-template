@@ -70,7 +70,7 @@ let respecConfig = {
   alternateFormats: [
       {
           label: "pdf",
-          uri: "",
+          uri: "static/template.pdf",
       },
   ],
   // Lokale lijst voor bibliografie
