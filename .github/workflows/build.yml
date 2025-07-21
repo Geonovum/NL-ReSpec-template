@@ -134,10 +134,10 @@ jobs:
       - name: Check links with Muffet
         run: |
           muffet \
-            --exclude '8080\/\S*\.pdf' \
+            --exclude '\.pdf$'  \
             --exclude '^https://gitdocumentatie.*' \
             --exclude '^https://docs.geostandaarden.*' \
-            --exclude 'localhost:8080' \
+            --exclude '.*localhost.*' \
             --header 'user-agent:Curl' \
             --ignore-fragments \
             --one-page-only \
