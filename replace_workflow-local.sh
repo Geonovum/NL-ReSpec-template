@@ -7,10 +7,10 @@
 #    - Klik in de adresbalk bovenin Verkenner en typ bash, gevolgd door Enter.
 #    Je krijgt nu een Git Bash-venster dat direct in deze projectmap is gestart.
 # 2. (Optioneel) Maak het script uitvoerbaar met:
-#      chmod +x update_workflow-local.sh
+#      chmod +x replace_workflow-local.sh
 #    Op Windows kun je dit meestal overslaan en direct naar stap 3 gaan.
 # 3. Voer het script uit met:
-#      bash update_workflow-local.sh
+#      bash replace_workflow-local.sh
 
 set -e
 
