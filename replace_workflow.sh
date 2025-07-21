@@ -2,13 +2,13 @@
 
 set -e
 
-TEMPLATE_REPO="Geonovum/NL-ReSpec-template"
+TEMPLATE_REPO="Geonovum/NL-ReSpec-GN-template"
 LOCAL_GITHUB_DIR="/Users/matthijshovestad/workspace/geonovum/NL-ReSpec-template/.github"
 TMP_DIR="/tmp/template-update-$(date +%s)"
 mkdir -p "$TMP_DIR"
 
 echo "🔍 Zoeken naar repositories gebaseerd op: $TEMPLATE_REPO"
-REPOS=$(gh repo list Geonovum --json name,templateRepository --jq ".[] | select(.templateRepository.name == \"NL-ReSpec-template\") | .name")
+REPOS=$(gh repo list Geonovum --json name,templateRepository --jq ".[] | select(.templateRepository.name == \"NL-ReSpec-GN-template\") | .name")
 
 if [[ -z "$REPOS" ]]; then
   echo "⚠️ Geen afgeleide repositories gevonden."
