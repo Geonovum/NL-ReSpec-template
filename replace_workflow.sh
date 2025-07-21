@@ -1,48 +1,62 @@
 #!/bin/bash
 
-# Uitvoeren van het script op Windows (Git Bash):
-# 1. Open Git Bash in de hoofdmap van je project:
-#    - Open de Windows Verkenner (map-icoon in je taakbalk).
-#    - Navigeer naar de map waar jouw project staat.
-#    - Klik in de adresbalk bovenin Verkenner en typ bash, gevolgd door Enter.
-#    Je krijgt nu een Git Bash-venster dat direct in deze projectmap is gestart.
-# 2. (Optioneel) Maak het script uitvoerbaar met:
-#      chmod +x update_workflow.sh
-#    Op Windows kun je dit meestal overslaan en direct naar stap 3 gaan.
-# 3. Voer het script uit met:
-#      bash update_workflow.sh
+set -e
 
+TEMPLATE_REPO="Geonovum/NL-ReSpec-template"
+LOCAL_GITHUB_DIR="/Users/matthijshovestad/workspace/geonovum/NL-ReSpec-template/.github"
+TMP_DIR="/tmp/template-update-$(date +%s)"
+mkdir -p "$TMP_DIR"
 
-# Repository URL
-TEMPLATE_REPO="https://github.com/Geonovum/NL-ReSpec-template"
+echo "🔍 Zoeken naar repositories gebaseerd op: $TEMPLATE_REPO"
+REPOS=$(gh repo list Geonovum --json name,templateRepository --jq ".[] | select(.templateRepository.name == \"NL-ReSpec-template\") | .name")
 
-# Tijdelijke map voor de template
-TEMP_DIR="NL-ReSpec-template-temp"
-
-# Clone de NL-ReSpec-template
-echo "➡️  Clonen van NL-ReSpec-template..."
-git clone "$TEMPLATE_REPO" "$TEMP_DIR"
-
-# Controleer of clone succesvol was
-if [ ! -d "$TEMP_DIR" ]; then
-  echo "❌ Het clonen van NL-ReSpec-template is mislukt."
+if [[ -z "$REPOS" ]]; then
+  echo "⚠️ Geen afgeleide repositories gevonden."
   exit 1
 fi
 
-# Vervang workflows
-rm -rf .github/workflows
-mkdir -p .github
-cp -R "$TEMP_DIR/.github/workflows" .github/
+for REPO in $REPOS; do
+  echo "➡️ Verwerken van repo: $REPO"
+  REPO_DIR="$TMP_DIR/$REPO"
+  git clone "git@github.com:Geonovum/$REPO.git" "$REPO_DIR"
+  cd "$REPO_DIR"
 
-# Verwijder de tijdelijke clone
-rm -rf "$TEMP_DIR"
+  BRANCHES=$(git branch -r | grep -v '\->' | sed 's|origin/||' | uniq)
 
-# Commit en push als er wijzigingen zijn
-if [ -n "$(git status --porcelain)" ]; then
-  git add .github/workflows
-  git commit -m "Update workflows vanuit NL-ReSpec-template"
-  git push origin main
-  echo "✅ Workflows succesvol geüpdatet."
-else
-  echo "ℹ️  Geen wijzigingen gevonden."
-fi
+  for BRANCH in $BRANCHES; do
+    echo "🔁 Branch: $BRANCH"
+    git checkout "$BRANCH"
+
+    echo "🧹 Oude .github folder verwijderen"
+    rm -rf .github
+    cp -r "$LOCAL_GITHUB_DIR" .github
+
+    # README melding toevoegen
+    README_NOTICE=$(cat <<'EOF'
+⚠️ Deze repository is automatisch bijgewerkt naar de nieuwste workflow.
+Voor vragen, neem contact op met [Linda van den Brink](mailto:l.vandenbrink@geonovum.nl) of [Wilko Quak](mailto:w.quak@geonovum.nl).
+
+Als je een nieuwe publicatie wilt starten, lees dan eerst de instructies in de README van de NL-ReSpec-template:
+[https://github.com/Geonovum/NL-ReSpec-template](https://github.com/Geonovum/NL-ReSpec-template).
+EOF
+    )
+
+    if [[ -f "README.md" ]]; then
+      if ! grep -q "automatisch bijgewerkt naar de nieuwste workflow" README.md; then
+        echo -e "$README_NOTICE\n\n$(cat README.md)" > README.md
+        echo "📘 README.md aangepast."
+      else
+        echo "📘 README.md bevat al de melding."
+      fi
+    else
+      echo -e "$README_NOTICE" > README.md
+      echo "📘 README.md aangemaakt."
+    fi
+
+    git add .github README.md
+    git commit -m "Update .github workflows en README instructies" || echo "🔹 Niets om te committen"
+    git push origin "$BRANCH"
+  done
+done
+
+echo "✅ Klaar. Alles bijgewerkt in $TMP_DIR"
