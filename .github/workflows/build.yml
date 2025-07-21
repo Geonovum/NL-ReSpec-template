@@ -136,6 +136,7 @@ jobs:
           muffet \
             --exclude '8080\/\S*\.pdf' \
             --exclude '^https://gitdocumentatie.*' \
+            --exclude '^https://docs.geostandaarden.*' \
             --exclude 'localhost:8080' \
             --header 'user-agent:Curl' \
             --ignore-fragments \
