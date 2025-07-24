@@ -1,3 +1,4 @@
+#Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 $ErrorActionPreference = "Stop"
 
 $TEMPLATE_REPO = "https://github.com/Geonovum/NL-ReSpec-template"
