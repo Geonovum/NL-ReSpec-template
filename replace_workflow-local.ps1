@@ -67,7 +67,7 @@ Als je een nieuwe publicatie wilt starten, lees dan eerst de instructies in de R
     if ($changes) {
         git add .github/workflows README.md
         git commit -m "Update workflows en README vanuit NL-ReSpec-template"
-        git push origin $branch
+        git push
         Write-Host "Branch '$branch' bijgewerkt en gepusht."
     } else {
         Write-Host "⏭️ Geen wijzigingen in branch '$branch'."
