@@ -1,6 +1,8 @@
 name: Build / check
 on:
   workflow_call:
+env:
+  CHECK_DIR: ".checks"
 jobs:
   snapshot:
     name: Generate Snapshot
@@ -87,8 +89,10 @@ jobs:
 
       - name: Run WCAG2AA check
         run: |
+          mkdir -p $CHECK_DIR
           pa11y snapshot.html \
-            --ignore WCAG2AA.Principle4.Guideline4_1.4_1_1.F77 || true
+            --ignore WCAG2AA.Principle4.Guideline4_1.4_1_1.F77 \
+            > $CHECK_DIR/wcag-report.txt || true
 
   links:
     name: Link Validation
@@ -135,6 +139,7 @@ jobs:
 
       - name: Check links with Muffet
         run: |
+          mkdir -p $CHECK_DIR
           muffet \
             --exclude '\.pdf$'  \
             --exclude '^https://gitdocumentatie.*' \
@@ -144,4 +149,14 @@ jobs:
             --ignore-fragments \
             --one-page-only \
             http://localhost:8080/snapshot.html \
-            --buffer-size 8192 || true
+            --buffer-size 8192 > $CHECK_DIR/link-check.txt || true
+
+      - name: Commit accessibility and link check results
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch --all
+          git add $CHECK_DIR/*.txt
+          git commit -m "WCAG en link check resultaten toegevoegd" || echo "No changes to commit"
+          git push

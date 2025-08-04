@@ -1,2 +1,4 @@
 ﻿*_log
 .idea
+.checks/*
+!.checks/*.txt
