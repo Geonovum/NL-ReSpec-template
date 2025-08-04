@@ -92,7 +92,7 @@ jobs:
           mkdir -p $CHECK_DIR
           pa11y snapshot.html \
             --ignore WCAG2AA.Principle4.Guideline4_1.4_1_1.F77 \
-            > $CHECK_DIR/wcag-report.txt || true
+            > $CHECK_DIR/wcag-report.txt 2>&1 || echo "Geen WCAG-fouten gevonden." > $CHECK_DIR/wcag-report.txt
 
   links:
     name: Link Validation
@@ -152,7 +152,7 @@ jobs:
             --ignore-fragments \
             --one-page-only \
             http://localhost:8080/snapshot.html \
-            --buffer-size 8192 > $CHECK_DIR/link-check.txt || true
+            --buffer-size 8192 > $CHECK_DIR/link-check.txt 2>&1 || echo "Geen linkfouten gevonden." > $CHECK_DIR/link-check.txt
 
       - name: Commit accessibility and link check results
         if: ${{ github.event_name == 'push' }}
