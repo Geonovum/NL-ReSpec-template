@@ -97,8 +97,7 @@ jobs:
 
       - name: Commit all results
         if: >
-          github.event_name == 'push' &&
-          (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+          github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
