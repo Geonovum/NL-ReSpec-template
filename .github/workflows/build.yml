@@ -35,21 +35,21 @@ jobs:
             fi
           fi
 
-      - name: Copy pdf.js if needed
-        if: ${{ steps.config.outputs.grep == 'true' }}
-        run: cp .github/workflows/pdf.js .
+#      - name: Copy pdf.js if needed
+#        if: ${{ steps.config.outputs.grep == 'true' }}
+#        run: cp .github/workflows/pdf.js .
 
-      - name: Generate PDF(s)
-        if: ${{ steps.config.outputs.grep == 'true' }}
-        run: |
-          cp ./js/config.js config.js
-          echo "module.exports = { respecConfig };" >> config.js
-          echo "var window = {respecMermaid:{createFigures:null}};" | cat - config.js > temp && mv temp config.js
-          npm install puppeteer
-          python3 -m http.server 8080 &
-          rm -f *.pdf
-          node pdf.js
-          mv *.pdf static/
+#      - name: Generate PDF(s)
+#        if: ${{ steps.config.outputs.grep == 'true' }}
+#        run: |
+#          cp ./js/config.js config.js
+#          echo "module.exports = { respecConfig };" >> config.js
+#          echo "var window = {respecMermaid:{createFigures:null}};" | cat - config.js > temp && mv temp config.js
+#          npm install puppeteer
+#          python3 -m http.server 8080 &
+#          rm -f *.pdf
+#          node pdf.js
+#          mv *.pdf static/
 
       - name: Run WCAG2AA check
         run: |
@@ -102,15 +102,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls static/*.pdf 1>/dev/null 2>&1; then
-            mv static/*.pdf .
-          fi
+#          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls static/*.pdf 1>/dev/null 2>&1; then
+#            mv static/*.pdf .
+#          fi
 
           git add snapshot.html $CHECK_DIR/*.txt
 
-          if compgen -G "*.pdf" > /dev/null; then
-            git add *.pdf
-          fi
+#          if compgen -G "*.pdf" > /dev/null; then
+#            git add *.pdf
+#          fi
 
           git commit -m "Snapshot + checks gegenereerd" || echo "No changes to commit"
 
