@@ -45,10 +45,12 @@ let respecConfig = {
   //-- publishVersion is verplicht. Hij mag wel leeg zijn [], maar niet de lege string zijn "".
   publishVersion: [],
  
-  //-- Voor dit blok geldt: alleen als er eerdere versies zijn en altijd allemaal aan/uit! 
-  //previousVersion: "0.0.1",
+  //-- Voor dit blok geldt: alleen als er eerdere versies zijn en altijd beide aan/uit! 
   //previousPublishDate: "2014-05-01",
   //previousMaturity: "CV",
+
+  //-- Deze gebruiken we niet binnen Geonovum
+  //prevVersion: "0.0.1",
 
   //-- TODO: de namen van de Editor(s) / Redacteur(en)
   //-- vul in: per Editor: name:, company:, companyURL:
