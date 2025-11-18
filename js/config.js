@@ -33,7 +33,8 @@ let respecConfig = {
   license: "cc-by",                 // Attribution, met bronvermelding
 
   //-- TODO shortName is verplicht! (komt in de URL: kies logische afkorting)
-  shortName: "NL-ReSpec-template",
+  //-- Regel: shortName mag geen hoofdletters bevatten.
+  shortName: "nl-respec-template",
   
   //edDraftURI = De URI van de draft version. Deze wordt automatisch afgeleid van de github URI; maar kan hier overschreven worden. 
 	//edDraftURI: ["https://geonovum.github.io", "/", "shortName"],
