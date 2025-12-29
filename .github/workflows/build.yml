@@ -20,9 +20,33 @@ jobs:
 
       - name: Validate HTML
         run: |
+          set +e
           docker run --rm -v "$PWD:/site" ghcr.io/validator/validator:latest \
             vnu --errors-only --skip-non-html --format json /site/snapshot.html \
-            | tee $CHECK_DIR/html-validation.json
+            > $CHECK_DIR/html-validation.json
+          status=$?
+          set -e
+
+          jq -r '
+            if (.messages|length==0) then "Geen HTML-validatiefouten."
+            else
+              .messages[]
+              | "[\(.type|ascii_upcase)] regel \(.lastLine // \"?\"):\(.lastColumn // \"?\") - \((.message // \"\") | gsub(\"\\s+\";\" \"))"
+            end
+          ' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.log
+
+          jq -r '
+            def esc: gsub("%";"%25") | gsub("\r";"%0D") | gsub("\n";"%0A");
+            if (.messages|length>0) then
+              .messages[]
+              | "::error file=snapshot.html,line=\(.lastLine // 1),col=\(.lastColumn // 1)::[\(.type|ascii_upcase)] \((.message // \"\") | esc)"
+            else empty end
+          ' $CHECK_DIR/html-validation.json
+
+          if [ "$status" -ne 0 ]; then
+            echo "HTML validatie gaf fouten. Zie annotaties hierboven en $CHECK_DIR/html-validation.log"
+            exit $status
+          fi
 
       - name: Check for alternateFormats via Node
         id: config
