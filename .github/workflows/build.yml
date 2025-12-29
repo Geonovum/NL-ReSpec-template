@@ -22,7 +22,7 @@ jobs:
         run: |
           set +e
           docker run --rm -v "$PWD:/site" ghcr.io/validator/validator:latest \
-            vnu --errors-only --skip-non-html --format json /site/snapshot.html \
+            java -jar /vnu.jar --errors-only --skip-non-html --format json /site/snapshot.html \
             > $CHECK_DIR/html-validation.json
           status=$?
           set -e
