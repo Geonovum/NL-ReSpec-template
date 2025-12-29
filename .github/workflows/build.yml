@@ -31,7 +31,7 @@ jobs:
             if (.messages|length==0) then "Geen HTML-validatiefouten."
             else
               .messages[]
-              | "[\(.type|ascii_upcase)] regel \(.lastLine // \"?\"):\(.lastColumn // \"?\") - \((.message // \"\") | gsub(\"\\s+\";\" \"))"
+              | "[\(.type|ascii_upcase)] regel \(.lastLine // "?"):\(.lastColumn // "?") - \((.message // "") | gsub("\\s+";" "))"
             end
           ' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.log
 
@@ -39,7 +39,7 @@ jobs:
             def esc: gsub("%";"%25") | gsub("\r";"%0D") | gsub("\n";"%0A");
             if (.messages|length>0) then
               .messages[]
-              | "::error file=snapshot.html,line=\(.lastLine // 1),col=\(.lastColumn // 1)::[\(.type|ascii_upcase)] \((.message // \"\") | esc)"
+              | "::error file=snapshot.html,line=\(.lastLine // 1),col=\(.lastColumn // 1)::[\(.type|ascii_upcase)] \((.message // "") | esc)"
             else empty end
           ' $CHECK_DIR/html-validation.json
 
