@@ -28,7 +28,7 @@ jobs:
           set -e
 
           echo "HTML validator output (pretty JSON):"
-          jq '.' $CHECK_DIR/html-validation.json
+          jq '.' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.pretty.json
 
           jq -r '
             if (.messages|length==0) then "Geen HTML-validatiefouten."
@@ -36,7 +36,7 @@ jobs:
               .messages[]
               | "[\(.type|ascii_upcase)] regel \(.lastLine // "?"):\(.lastColumn // "?") - \((.message // "") | gsub("\\s+";" "))"
             end
-          ' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.log
+          ' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.txt
 
           jq -r '
             def esc: gsub("%";"%25") | gsub("\r";"%0D") | gsub("\n";"%0A");
@@ -47,7 +47,7 @@ jobs:
           ' $CHECK_DIR/html-validation.json
 
           if [ "$status" -ne 0 ]; then
-            echo "HTML validatie gaf fouten. Zie annotaties hierboven en $CHECK_DIR/html-validation.log"
+            echo "HTML validatie gaf fouten. Zie annotaties hierboven en $CHECK_DIR/html-validation.txt"
             exit $status
           fi
 
@@ -79,9 +79,17 @@ jobs:
           echo "module.exports = { respecConfig };" >> config.js
           echo "var window = {respecMermaid:{createFigures:null}};" | cat - config.js > temp && mv temp config.js
           npm install puppeteer
-          python3 -m http.server 8081 &
+          python3 -m http.server 8081 >/dev/null 2>&1 &
+          # wacht tot de lokale server draait
+          for i in {1..30}; do
+            if curl -sf http://localhost:8081/snapshot.html > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -sf http://localhost:8081/snapshot.html > /dev/null || (echo "Local HTTP server on 8081 not reachable"; exit 1)
           rm -f *.pdf
-          node pdf.js
+          PDF_SNAPSHOT_URL=http://localhost:8081/snapshot.html node pdf.js
           mv *.pdf static/
 
       - name: Run WCAG2AA check
