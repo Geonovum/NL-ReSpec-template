@@ -18,36 +18,20 @@ jobs:
       - name: Generate HTML snapshot
         run: npx respec --localhost --src index.html --out snapshot.html
 
-      - name: Validate HTML
+      - name: Prepare HTML for validation
         run: |
-          docker run --rm -v "$PWD:/site" ghcr.io/validator/validator:latest \
-            java -jar /vnu.jar --errors-only --skip-non-html --format json /site/snapshot.html \
-            > $CHECK_DIR/html-validation.json
-          status=$?
+          mkdir -p $CHECK_DIR/site
+          cp snapshot.html $CHECK_DIR/site/
 
-          echo "HTML validator output:"
-          jq '.' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.pretty.json
-
-          jq -r '
-            if (.messages|length==0) then "Geen HTML-validatiefouten."
-            else
-              .messages[]
-              | "[\(.type|ascii_upcase)] regel \(.lastLine // "?"):\(.lastColumn // "?") - \((.message // "") | gsub("\\s+";" "))"
-            end
-          ' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.txt
-
-          jq -r '
-            def esc: gsub("%";"%25") | gsub("\r";"%0D") | gsub("\n";"%0A");
-            if (.messages|length>0) then
-              .messages[]
-              | "::error file=snapshot.html,line=\(.lastLine // 1),col=\(.lastColumn // 1)::[\(.type|ascii_upcase)] \((.message // "") | esc)"
-            else empty end
-          ' $CHECK_DIR/html-validation.json
-
-          if [ "$status" -ne 0 ]; then
-            echo "HTML validatie gaf fouten. Zie annotaties hierboven en $CHECK_DIR/html-validation.txt"
-            exit $status
-          fi
+      - name: Validate HTML
+        uses: anishathalye/proof-html@v2
+        with:
+          directory: ${{ env.CHECK_DIR }}/site
+          check_html: true
+          check_css: false
+          disable_external: true
+          check_external_hash: false
+          enforce_https: false
 
       - name: Check for alternateFormats via Node
         id: config
