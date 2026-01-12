@@ -15,7 +15,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download snapshot artefact
         uses: actions/download-artifact@v4
@@ -142,7 +142,7 @@ jobs:
           echo "Metadata en folder-path gevalideerd en opgeslagen"
 
       - name: Checkout private docs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Geonovum/docs.geostandaarden.nl
           token: ${{ secrets.GH_PUSH_TOKEN }}
