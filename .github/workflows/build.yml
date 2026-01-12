@@ -111,18 +111,29 @@ jobs:
             --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22a,wcag22aa \
             http://localhost:8080/snapshot.html \
             > $CHECK_DIR/axe-report.json; then
-            jq -r '
-              .[] as $page |
-              if ($page.violations | length) == 0 then "Geen WCAG-fouten gevonden."
-              else
+            jq '
+              [
+                .[] as $page |
                 $page.violations[] |
-                "[\(.impact // "unknown")] \(.id) - \(.description) (\(.helpUrl))",
-                (.nodes[]? | "  - \(.target | join(", "))\n    \(.failureSummary // "")"),
-                ""
-              end
-            ' $CHECK_DIR/axe-report.json | tee $CHECK_DIR/wcag-report.txt
+                {
+                  url: $page.url,
+                  id,
+                  impact,
+                  description,
+                  helpUrl,
+                  nodes: [
+                    .nodes[] |
+                    {
+                      target,
+                      html,
+                      failureSummary
+                    }
+                  ]
+                }
+              ]
+            ' $CHECK_DIR/axe-report.json > $CHECK_DIR/wcag-report.json
           else
-            echo "WCAG-check mislukt (axe-cli). Zie logs voor details." | tee $CHECK_DIR/wcag-report.txt
+            echo "{\"error\":\"WCAG-check mislukt (axe-cli). Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
           fi
 
       - name: Run link check with Muffet
@@ -153,7 +164,7 @@ jobs:
             mv static/*.pdf .
           fi
 
-          git add snapshot.html $CHECK_DIR/*.txt
+          git add snapshot.html $CHECK_DIR/*.txt $CHECK_DIR/*.json
 
           if compgen -G "*.pdf" > /dev/null; then
             git add *.pdf
