@@ -77,13 +77,6 @@ jobs:
           PDF_SNAPSHOT_URL=http://localhost:8081/snapshot.html node pdf.js
           mv *.pdf static/
 
-      - name: Run WCAG2AA check
-        run: |
-          npm install -g pa11y
-          pa11y snapshot.html \
-            --ignore WCAG2AA.Principle4.Guideline4_1.4_1_1.F77 \
-            > $CHECK_DIR/wcag-report.txt 2>&1 || echo "Geen WCAG-fouten gevonden." > $CHECK_DIR/wcag-report.txt
-
       - name: Serve snapshot over HTTP
         uses: Eun/http-server-action@v1
         with:
@@ -103,6 +96,32 @@ jobs:
               "txt": "text/plain",
               "xml": "text/xml"
             }
+
+      - name: Run WCAG 2.2 check
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:8080/snapshot.html > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -sf http://localhost:8080/snapshot.html > /dev/null || (echo "Local HTTP server on 8080 not reachable"; exit 1)
+
+          if npx --yes @axe-core/cli@latest --stdout \
+            --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22a,wcag22aa \
+            http://localhost:8080/snapshot.html \
+            > $CHECK_DIR/axe-report.json; then
+            jq -r '
+              .[] as $page |
+              if ($page.violations | length) == 0 then "Geen WCAG-fouten gevonden."
+              else
+                $page.violations[]
+                | "[\(.impact // "unknown")] \(.id) - \(.description) (\(.helpUrl))"
+              end
+            ' $CHECK_DIR/axe-report.json | tee $CHECK_DIR/wcag-report.txt
+          else
+            echo "WCAG-check mislukt (axe-cli). Zie logs voor details." | tee $CHECK_DIR/wcag-report.txt
+          fi
 
       - name: Run link check with Muffet
         run: |
