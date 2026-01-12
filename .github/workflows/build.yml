@@ -132,8 +132,10 @@ jobs:
                 }
               ]
             ' $CHECK_DIR/axe-report.json > $CHECK_DIR/wcag-report.json
+            echo "WCAG output saved to $CHECK_DIR/axe-report.json and $CHECK_DIR/wcag-report.json"
           else
             echo "{\"error\":\"WCAG-check mislukt (axe-cli). Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
+            echo "WCAG output saved to $CHECK_DIR/wcag-report.json (error)"
           fi
 
       - name: Run link check with Muffet
