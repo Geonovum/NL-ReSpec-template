@@ -107,32 +107,32 @@ jobs:
           done
           curl -sf http://localhost:8080/snapshot.html > /dev/null || (echo "Local HTTP server on 8080 not reachable"; exit 1)
 
+          set -o pipefail
           if npx --yes @axe-core/cli@latest --stdout \
             --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22a,wcag22aa \
             http://localhost:8080/snapshot.html \
-            > $CHECK_DIR/axe-report.json; then
-            jq '
-              [
-                .[] as $page |
-                $page.violations[] |
-                {
-                  url: $page.url,
-                  id,
-                  impact,
-                  description,
-                  helpUrl,
-                  nodes: [
-                    .nodes[] |
-                    {
-                      target,
-                      html,
-                      failureSummary
-                    }
-                  ]
-                }
-              ]
-            ' $CHECK_DIR/axe-report.json > $CHECK_DIR/wcag-report.json
-            echo "WCAG output saved to $CHECK_DIR/axe-report.json and $CHECK_DIR/wcag-report.json"
+            | jq '
+                [
+                  .[] as $page |
+                  $page.violations[] |
+                  {
+                    url: $page.url,
+                    id,
+                    impact,
+                    description,
+                    helpUrl,
+                    nodes: [
+                      .nodes[] |
+                      {
+                        target,
+                        html,
+                        failureSummary
+                      }
+                    ]
+                  }
+                ]
+              ' > $CHECK_DIR/wcag-report.json; then
+            echo "WCAG output saved to $CHECK_DIR/wcag-report.json"
           else
             echo "{\"error\":\"WCAG-check mislukt (axe-cli). Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
             echo "WCAG output saved to $CHECK_DIR/wcag-report.json (error)"
