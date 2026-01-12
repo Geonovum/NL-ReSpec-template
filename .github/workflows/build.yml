@@ -157,7 +157,7 @@ jobs:
           git push --force-with-lease origin HEAD:"$BRANCH"
 
       - name: Upload snapshot artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: snapshot
           path: |
