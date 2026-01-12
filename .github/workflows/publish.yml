@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download snapshot artefact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: snapshot
           path: .
