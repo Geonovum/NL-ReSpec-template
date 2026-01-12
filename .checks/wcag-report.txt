@@ -1,2 +1,0 @@
-[serious] color-contrast - Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds (https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=webdriverjs)
-[serious] scrollable-region-focusable - Ensure elements that have scrollable content are accessible by keyboard (https://dequeuniversity.com/rules/axe/4.11/scrollable-region-focusable?application=webdriverjs)
