@@ -20,14 +20,12 @@ jobs:
 
       - name: Validate HTML
         run: |
-          set +e
           docker run --rm -v "$PWD:/site" ghcr.io/validator/validator:latest \
             java -jar /vnu.jar --errors-only --skip-non-html --format json /site/snapshot.html \
             > $CHECK_DIR/html-validation.json
           status=$?
-          set -e
 
-          echo "HTML validator output (pretty JSON):"
+          echo "HTML validator output:"
           jq '.' $CHECK_DIR/html-validation.json | tee $CHECK_DIR/html-validation.pretty.json
 
           jq -r '
