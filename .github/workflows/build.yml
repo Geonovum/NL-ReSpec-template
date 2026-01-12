@@ -22,6 +22,9 @@ jobs:
         run: |
           mkdir -p $CHECK_DIR/site
           cp snapshot.html $CHECK_DIR/site/
+          if [ -d media ]; then
+            cp -R media $CHECK_DIR/site/
+          fi
 
       - name: Validate HTML
         uses: anishathalye/proof-html@v2
