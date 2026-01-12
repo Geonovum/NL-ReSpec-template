@@ -117,7 +117,7 @@ jobs:
               else
                 $page.violations[] |
                 "[\(.impact // "unknown")] \(.id) - \(.description) (\(.helpUrl))",
-                (.nodes[]? | "  - \(.target | join(\", \"))\n    \(.failureSummary // \"\")"),
+                (.nodes[]? | "  - \(.target | join(", "))\n    \(.failureSummary // "")"),
                 ""
               end
             ' $CHECK_DIR/axe-report.json | tee $CHECK_DIR/wcag-report.txt
