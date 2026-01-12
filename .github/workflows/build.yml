@@ -115,8 +115,10 @@ jobs:
               .[] as $page |
               if ($page.violations | length) == 0 then "Geen WCAG-fouten gevonden."
               else
-                $page.violations[]
-                | "[\(.impact // "unknown")] \(.id) - \(.description) (\(.helpUrl))"
+                $page.violations[] |
+                "[\(.impact // "unknown")] \(.id) - \(.description) (\(.helpUrl))",
+                (.nodes[]? | "  - \(.target | join(\", \"))\n    \(.failureSummary // \"\")"),
+                ""
               end
             ' $CHECK_DIR/axe-report.json | tee $CHECK_DIR/wcag-report.txt
           else
