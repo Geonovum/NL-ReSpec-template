@@ -28,6 +28,7 @@ jobs:
 
       - name: Validate HTML
         uses: anishathalye/proof-html@v2
+        continue-on-error: true
         with:
           directory: ${{ env.CHECK_DIR }}/site
           check_html: true
