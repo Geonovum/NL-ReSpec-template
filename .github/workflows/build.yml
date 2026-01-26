@@ -97,6 +97,12 @@ jobs:
               "xml": "text/xml"
             }
 
+      - name: Ensure latest Chrome for WCAG check
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
       - name: Run WCAG 2.2 check
         run: |
           for i in {1..30}; do
@@ -140,7 +146,6 @@ jobs:
 
       - name: Run link check with Muffet
         run: |
-          sudo apt-get update
           sudo apt-get install -y golang-go
           go install github.com/raviqqe/muffet@latest
           echo "${HOME}/go/bin" >> $GITHUB_PATH
