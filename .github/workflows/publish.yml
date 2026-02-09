@@ -2,7 +2,9 @@ name: Publish
 on:
   workflow_call:
     secrets:
-      GH_PUSH_TOKEN:
+      GH_APP_ID:
+        required: true
+      GH_APP_PRIVATE_KEY:
         required: true
   workflow_dispatch:
 
@@ -141,11 +143,21 @@ jobs:
 
           echo "Metadata en folder-path gevalideerd en opgeslagen"
 
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            docs.geostandaarden.nl
+
       - name: Checkout private docs
         uses: actions/checkout@v6
         with:
           repository: Geonovum/docs.geostandaarden.nl
-          token: ${{ secrets.GH_PUSH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           path: docs.geostandaarden.nl
 
       - name: Switch naar develop branch bij pre-release
@@ -207,7 +219,7 @@ jobs:
         if: ${{ github.event.release.prerelease != true }}
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.GH_PUSH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           path: docs.geostandaarden.nl
           branch: auto-update-${{ github.run_id }}
           base: main
