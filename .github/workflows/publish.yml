@@ -145,7 +145,7 @@ jobs:
 
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
@@ -175,14 +175,6 @@ jobs:
           cp -r content/* docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/
           rm docs.geostandaarden.nl/${{ steps.metadata.outputs.folderPath }}/js/config.js
           
-      - name: Push naar develop bij pre-release
-        if: ${{ github.event.release.prerelease == true }}
-        run: |
-          cd docs.geostandaarden.nl
-          git add .
-          git commit -m "Automatische pre-release update van ${{ github.repository }}"
-          git push origin develop
-
       - name: Update .htaccess “latest” pointer
         run: |
           set -euo pipefail
@@ -214,6 +206,14 @@ jobs:
             "$REPO_DIR/$LINK_DIR/.htaccess"
 
           echo "Updated $REPO_DIR/$LINK_DIR/.htaccess -> /$TOPIC/$VERSION_DIR/"
+
+      - name: Push naar develop bij pre-release
+        if: ${{ github.event.release.prerelease == true }}
+        run: |
+          cd docs.geostandaarden.nl
+          git add .
+          git commit -m "Automatische pre-release update van ${{ github.repository }}"
+          git push origin develop
 
       - name: Create PR naar main bij release
         if: ${{ github.event.release.prerelease != true }}
