@@ -91,7 +91,7 @@ let respecConfig = {
   //
   // Lokale lijst voor bibliografie
   // - Kijk eerst naar de beschikbare www.specref.org .
-  // - Kijk daarna in de organisatieconfig op: https://tools.geostandaarden.nl/specref/)
+  // - Kijk daarna in de organisatieconfig op: https://tools.geostandaarden.nl/specref/
   // - Voeg dan pas hieronder toe.
   // - Zie handleiding: https://geonovum.github.io/handleiding-tooling/ReSpec/ReSpec-onderdelen/#bibliografie
   //
