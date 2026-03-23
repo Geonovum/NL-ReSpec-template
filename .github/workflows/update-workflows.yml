@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry run — toon wijzigingen maar maak geen PRs aan'
+        description: 'Dry run — toon wijzigingen maar commit niet'
         type: boolean
         default: false
 
@@ -34,16 +34,8 @@ jobs:
           ORG: ${{ matrix.org }}
           DRY_RUN: ${{ inputs.dry_run }}
           TEMPLATE_GITHUB_DIR: ${{ github.workspace }}/.github
-          BRANCH_NAME: update/github-workflows-${{ github.run_id }}
         run: |
           set -euo pipefail
-
-          PR_TITLE="chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
-          PR_BODY="## Automatische workflow update
-
-          De GitHub Actions workflows zijn bijgewerkt vanuit [NL-ReSpec-template](https://github.com/Geonovum/NL-ReSpec-template) (run [\`${{ github.run_id }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})).
-
-          Controleer de wijzigingen voor je merget."
 
           # ── Verzamel repos ──────────────────────────────────────────────
           AUTO_DETECT=$(jq -r --arg org "$ORG" '.[$org].auto_detect // false' .github/repos.json)
@@ -81,12 +73,15 @@ jobs:
             TMP=$(mktemp -d)
 
             if ! (
-              gh repo clone "$ORG/$REPO" "$TMP" -- --depth=1 --quiet
+              DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
+                --json defaultBranchRef --jq '.defaultBranchRef.name')
+
+              gh repo clone "$ORG/$REPO" "$TMP" -- --depth=1 --quiet \
+                --branch "$DEFAULT_BRANCH"
 
               cd "$TMP"
               git config user.email "github-actions[bot]@users.noreply.github.com"
               git config user.name "github-actions[bot]"
-              git checkout -b "$BRANCH_NAME"
 
               rm -rf .github
               cp -r "$TEMPLATE_GITHUB_DIR" .github
@@ -101,36 +96,16 @@ jobs:
               fi
 
               git add .github
-              git commit -m "chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
 
               if [[ "$DRY_RUN" == "true" ]]; then
                 echo "🔍 Dry run — gewijzigde bestanden:"
-                git diff HEAD~1 --name-only
+                git diff --staged --name-only
                 exit 0
               fi
 
-              git push origin "$BRANCH_NAME" --force
-
-              EXISTING=$(gh pr list \
-                --repo "$ORG/$REPO" \
-                --head "$BRANCH_NAME" \
-                --state open \
-                --json number \
-                --jq '.[0].number' 2>/dev/null || true)
-
-              if [[ -n "$EXISTING" ]]; then
-                echo "🔄 PR #$EXISTING al aanwezig, branch bijgewerkt."
-              else
-                DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
-                  --json defaultBranchRef --jq '.defaultBranchRef.name')
-                gh pr create \
-                  --repo "$ORG/$REPO" \
-                  --title "$PR_TITLE" \
-                  --body "$PR_BODY" \
-                  --base "$DEFAULT_BRANCH" \
-                  --head "$BRANCH_NAME"
-                echo "✅ PR aangemaakt."
-              fi
+              git commit -m "chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
+              git push origin "$DEFAULT_BRANCH"
+              echo "✅ Gecommit op $DEFAULT_BRANCH."
             ); then
               echo "❌ Fout bij $ORG/$REPO"
               FAILED=$((FAILED + 1))
