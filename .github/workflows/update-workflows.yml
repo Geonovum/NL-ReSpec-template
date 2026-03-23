@@ -18,7 +18,7 @@ jobs:
         org: [Geonovum, BROprogramma]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Maak GitHub App token aan voor ${{ matrix.org }}
         id: token
