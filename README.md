@@ -113,3 +113,45 @@ https://test.docs.geostandaarden.nl/
 
 Na goedkeuring van de PR wordt het document gepubliceerd op:
 https://docs.geostandaarden.nl/
+
+---
+
+## Workflows updaten in document-repos
+
+De GitHub Actions workflows in alle document-repositories kunnen centraal
+bijgewerkt worden vanuit deze template via de workflow
+**"Update workflows in document repos"**.
+
+### Repos bijhouden (automatisch)
+
+Bij elke run wordt [`.github/repos.json`](.github/repos.json) eerst
+automatisch bijgewerkt:
+
+* Repos met `js/config.js` die **nog niet in de lijst staan** worden
+  toegevoegd met `"updateAllow": true`
+* Repos die **gearchiveerd of verwijderd** zijn worden uit de lijst verwijderd
+* De bijgewerkte `repos.json` wordt terug gecommit naar deze template repo
+
+Wil je een repo **uitsluiten** van updates, zet dan
+`"updateAllow": false` in `repos.json`. Die repo wordt dan nooit meer
+aangeraakt, ook niet bij toekomstige runs.
+
+Repos met een `config.js` in de root (maar nog niet in `js/`) krijgen een
+aparte PR om dit bestand te verplaatsen naar `js/config.js`.
+
+### Handmatig triggeren
+
+Ga naar
+[Actions → Update workflows in document repos](https://github.com/Geonovum/NL-ReSpec-template/actions/workflows/update-workflows.yml)
+en klik op **"Run workflow"**.
+
+* **Dry run** aanvinken om te zien welke repos bijgewerkt zouden worden,
+  zonder te committen of PRs aan te maken.
+
+### Wat wordt bijgewerkt?
+
+De volledige `.github/` map van de template wordt gekopieerd naar elke repo.
+De volgende bestanden worden **niet** meegekopieerd:
+
+* `.github/workflows/update-workflows.yml`
+* `.github/repos.json`
