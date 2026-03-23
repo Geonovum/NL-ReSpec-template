@@ -63,6 +63,7 @@ jobs:
           # ── Verwerk elke repo ───────────────────────────────────────────
           while IFS= read -r REPO; do
             [[ -z "$REPO" ]] && continue
+            [[ "$REPO" == ".github" ]] && continue
             echo ""
             echo "=== $ORG/$REPO ==="
 
