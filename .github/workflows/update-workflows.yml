@@ -1,0 +1,152 @@
+name: Update workflows in document repos
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — toon wijzigingen maar maak geen PRs aan'
+        type: boolean
+        default: false
+
+jobs:
+  update:
+    name: ${{ matrix.org }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        org: [Geonovum, BROprogramma]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Maak GitHub App token aan voor ${{ matrix.org }}
+        id: token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ matrix.org }}
+
+      - name: Update workflows in ${{ matrix.org }} repos
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          ORG: ${{ matrix.org }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          TEMPLATE_GITHUB_DIR: ${{ github.workspace }}/.github
+          BRANCH_NAME: update/github-workflows-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          PR_TITLE="chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
+          PR_BODY="## Automatische workflow update
+
+          De GitHub Actions workflows zijn bijgewerkt vanuit [NL-ReSpec-template](https://github.com/Geonovum/NL-ReSpec-template) (run [\`${{ github.run_id }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})).
+
+          Controleer de wijzigingen voor je merget."
+
+          # ── Verzamel repos ──────────────────────────────────────────────
+          AUTO_DETECT=$(jq -r --arg org "$ORG" '.[$org].auto_detect // false' .github/repos.json)
+
+          if [[ "$AUTO_DETECT" == "true" ]]; then
+            echo "Auto-detecteer repos in $ORG..."
+            REPOS=$(
+              page=1
+              while true; do
+                batch=$(gh api "orgs/$ORG/repos?per_page=100&page=$page&type=all" \
+                  --jq '.[].name' 2>/dev/null || true)
+                [[ -z "$batch" ]] && break
+                echo "$batch"
+                page=$((page + 1))
+              done | sort -u
+            )
+          else
+            REPOS=$(jq -r --arg org "$ORG" '.[$org].repos[] // empty' .github/repos.json)
+          fi
+
+          UPDATED=0; SKIPPED=0; FAILED=0
+
+          # ── Verwerk elke repo ───────────────────────────────────────────
+          while IFS= read -r REPO; do
+            [[ -z "$REPO" ]] && continue
+            echo ""
+            echo "=== $ORG/$REPO ==="
+
+            if ! gh api "repos/$ORG/$REPO/contents/js/config.js" > /dev/null 2>&1; then
+              echo "⏩ Geen js/config.js aanwezig, overslaan."
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            TMP=$(mktemp -d)
+
+            if ! (
+              gh repo clone "$ORG/$REPO" "$TMP" -- --depth=1 --quiet
+
+              cd "$TMP"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git config user.name "github-actions[bot]"
+              git checkout -b "$BRANCH_NAME"
+
+              rm -rf .github
+              cp -r "$TEMPLATE_GITHUB_DIR" .github
+              find .github -name '.DS_Store' -delete
+              # Verwijder bestanden die alleen in de template thuishoren
+              rm -f .github/workflows/update-workflows.yml
+              rm -f .github/repos.json
+
+              if git diff --quiet && git diff --staged --quiet; then
+                echo "✅ Geen wijzigingen."
+                exit 0
+              fi
+
+              git add .github
+              git commit -m "chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
+
+              if [[ "$DRY_RUN" == "true" ]]; then
+                echo "🔍 Dry run — gewijzigde bestanden:"
+                git diff HEAD~1 --name-only
+                exit 0
+              fi
+
+              git push origin "$BRANCH_NAME" --force
+
+              EXISTING=$(gh pr list \
+                --repo "$ORG/$REPO" \
+                --head "$BRANCH_NAME" \
+                --state open \
+                --json number \
+                --jq '.[0].number' 2>/dev/null || true)
+
+              if [[ -n "$EXISTING" ]]; then
+                echo "🔄 PR #$EXISTING al aanwezig, branch bijgewerkt."
+              else
+                DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
+                  --json defaultBranchRef --jq '.defaultBranchRef.name')
+                gh pr create \
+                  --repo "$ORG/$REPO" \
+                  --title "$PR_TITLE" \
+                  --body "$PR_BODY" \
+                  --base "$DEFAULT_BRANCH" \
+                  --head "$BRANCH_NAME"
+                echo "✅ PR aangemaakt."
+              fi
+            ); then
+              echo "❌ Fout bij $ORG/$REPO"
+              FAILED=$((FAILED + 1))
+            else
+              UPDATED=$((UPDATED + 1))
+            fi
+
+            rm -rf "$TMP"
+          done <<< "$REPOS"
+
+          echo ""
+          echo "════════════════════════════════════════"
+          echo "Samenvatting $ORG"
+          echo "  Bijgewerkt:   $UPDATED"
+          echo "  Overgeslagen: $SKIPPED"
+          echo "  Mislukt:      $FAILED"
+          echo "════════════════════════════════════════"
+
+          [[ $FAILED -eq 0 ]] || exit 1
