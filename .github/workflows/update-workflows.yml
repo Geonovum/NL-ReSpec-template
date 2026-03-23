@@ -120,12 +120,17 @@ jobs:
           echo "$UPDATED_JSON" | jq '.' > "$REPOS_FILE"
 
       - name: Commit repos.json indien gewijzigd
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add .github/repos.json
           if git diff --staged --quiet; then
             echo "Geen wijzigingen in repos.json."
+          elif [[ "$DRY_RUN" == "true" ]]; then
+            echo "🔍 Dry run — repos.json zou als volgt wijzigen:"
+            git diff --staged -- .github/repos.json
           else
             git commit -m "chore: sync repos.json"
             git push
@@ -197,6 +202,8 @@ jobs:
                   gh repo clone "$ORG/$REPO" "$TMP_CFG" -- --depth=1 --quiet \
                     --branch "$DEFAULT_BRANCH"
                   cd "$TMP_CFG"
+                  git remote set-url origin \
+                    "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
                   git config user.email "github-actions[bot]@users.noreply.github.com"
                   git config user.name "github-actions[bot]"
 
@@ -250,6 +257,8 @@ jobs:
                 --branch "$DEFAULT_BRANCH"
 
               cd "$TMP"
+              git remote set-url origin \
+                "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
               git config user.email "github-actions[bot]@users.noreply.github.com"
               git config user.name "github-actions[bot]"
 
