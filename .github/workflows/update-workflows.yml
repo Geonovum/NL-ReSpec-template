@@ -58,6 +58,7 @@ jobs:
 
           UPDATED=0; SKIPPED=0; FAILED=0
           WOULD_UPDATE=()
+          CONFIG_MOVE_PRS=()
 
           # ── Verwerk elke repo ───────────────────────────────────────────
           while IFS= read -r REPO; do
@@ -65,8 +66,66 @@ jobs:
             echo ""
             echo "=== $ORG/$REPO ==="
 
-            if ! gh api "repos/$ORG/$REPO/contents/js/config.js" > /dev/null 2>&1; then
-              echo "⏩ Geen js/config.js aanwezig, overslaan."
+            HAS_JS_CONFIG=$(gh api "repos/$ORG/$REPO/contents/js/config.js" \
+              > /dev/null 2>&1 && echo "true" || echo "false")
+            HAS_ROOT_CONFIG=$(gh api "repos/$ORG/$REPO/contents/config.js" \
+              > /dev/null 2>&1 && echo "true" || echo "false")
+
+            # ── config.js in root → PR aanmaken om te verplaatsen ──────────
+            if [[ "$HAS_ROOT_CONFIG" == "true" && "$HAS_JS_CONFIG" == "false" ]]; then
+              echo "📦 config.js gevonden in root, nog niet in js/ — PR aanmaken."
+
+              if [[ "$DRY_RUN" == "true" ]]; then
+                CONFIG_MOVE_PRS+=("$ORG/$REPO (config.js → js/config.js)")
+              else
+                TMP_CFG=$(mktemp -d)
+                EXIT_CODE_CFG=0
+                (
+                  DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
+                    --json defaultBranchRef --jq '.defaultBranchRef.name')
+                  gh repo clone "$ORG/$REPO" "$TMP_CFG" -- --depth=1 --quiet \
+                    --branch "$DEFAULT_BRANCH"
+                  cd "$TMP_CFG"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git config user.name "github-actions[bot]"
+
+                  MOVE_BRANCH="chore/verplaats-config-js-naar-js-map"
+                  git checkout -b "$MOVE_BRANCH"
+
+                  mkdir -p js
+                  git mv config.js js/config.js
+                  git commit -m "chore: verplaats config.js naar js/config.js"
+                  git push origin "$MOVE_BRANCH" --force
+
+                  EXISTING=$(gh pr list \
+                    --repo "$ORG/$REPO" \
+                    --head "$MOVE_BRANCH" \
+                    --state open \
+                    --json number \
+                    --jq '.[0].number' 2>/dev/null || true)
+
+                  if [[ -n "$EXISTING" ]]; then
+                    echo "🔄 PR #$EXISTING al aanwezig."
+                  else
+                    gh pr create \
+                      --repo "$ORG/$REPO" \
+                      --title "chore: verplaats config.js naar js/config.js" \
+                      --body "De \`config.js\` staat nu in de root van het project. Deze PR verplaatst het bestand naar \`js/config.js\` conform de NL-ReSpec-template structuur." \
+                      --base "$DEFAULT_BRANCH" \
+                      --head "$MOVE_BRANCH"
+                    echo "✅ PR aangemaakt voor config.js verplaatsing."
+                  fi
+                ) || EXIT_CODE_CFG=$?
+                rm -rf "$TMP_CFG"
+                [[ $EXIT_CODE_CFG -ne 0 ]] && { echo "❌ Fout bij config.js PR voor $ORG/$REPO"; FAILED=$((FAILED + 1)); }
+              fi
+
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            if [[ "$HAS_JS_CONFIG" == "false" ]]; then
+              echo "⏩ Geen js/config.js of config.js aanwezig, overslaan."
               SKIPPED=$((SKIPPED + 1))
               continue
             fi
@@ -123,8 +182,10 @@ jobs:
           echo "════════════════════════════════════════"
           echo "Samenvatting $ORG"
           if [[ "$DRY_RUN" == "true" ]]; then
-            echo "  Zou bijwerken: ${#WOULD_UPDATE[@]}"
+            echo "  Zou bijwerken (.github): ${#WOULD_UPDATE[@]}"
             for r in "${WOULD_UPDATE[@]}"; do echo "    - $r"; done
+            echo "  Zou PR aanmaken (config.js): ${#CONFIG_MOVE_PRS[@]}"
+            for r in "${CONFIG_MOVE_PRS[@]}"; do echo "    - $r"; done
           else
             echo "  Bijgewerkt:   $UPDATED"
           fi
