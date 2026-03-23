@@ -1,0 +1,35 @@
+{
+  "Geonovum": {
+    "auto_detect": true,
+    "detection_file": "js/config.js"
+  },
+  "BROprogramma": {
+    "auto_detect": false,
+    "detection_file": "js/config.js",
+    "repos": [
+      "BHR-AG",
+      "BHR-G",
+      "BHR-GT",
+      "BHR-P",
+      "CPT",
+      "SFR",
+      "FRD",
+      "GAR",
+      "GLD",
+      "GMN",
+      "GMW",
+      "GPD",
+      "GUF",
+      "SAD",
+      "SLD",
+      "EPC",
+      "EPL",
+      "SGM",
+      "DGM",
+      "GMM",
+      "GTM",
+      "WDM",
+      "HGM"
+    ]
+  }
+}

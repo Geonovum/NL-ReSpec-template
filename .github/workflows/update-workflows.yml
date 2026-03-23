@@ -1,0 +1,135 @@
+name: Update workflows in document repos
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — toon wijzigingen maar commit niet'
+        type: boolean
+        default: false
+
+jobs:
+  update:
+    name: ${{ matrix.org }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        org: [Geonovum, BROprogramma]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Maak GitHub App token aan voor ${{ matrix.org }}
+        id: token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ matrix.org }}
+
+      - name: Update workflows in ${{ matrix.org }} repos
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          ORG: ${{ matrix.org }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          TEMPLATE_GITHUB_DIR: ${{ github.workspace }}/.github
+        run: |
+          set -euo pipefail
+
+          # ── Verzamel repos ──────────────────────────────────────────────
+          AUTO_DETECT=$(jq -r --arg org "$ORG" '.[$org].auto_detect // false' .github/repos.json)
+
+          if [[ "$AUTO_DETECT" == "true" ]]; then
+            echo "Auto-detecteer repos in $ORG..."
+            REPOS=$(
+              page=1
+              while true; do
+                batch=$(gh api "orgs/$ORG/repos?per_page=100&page=$page&type=all" \
+                  --jq '.[].name' 2>/dev/null || true)
+                [[ -z "$batch" ]] && break
+                echo "$batch"
+                page=$((page + 1))
+              done | sort -u
+            )
+          else
+            REPOS=$(jq -r --arg org "$ORG" '.[$org].repos[] // empty' .github/repos.json)
+          fi
+
+          UPDATED=0; SKIPPED=0; FAILED=0
+          WOULD_UPDATE=()
+
+          # ── Verwerk elke repo ───────────────────────────────────────────
+          while IFS= read -r REPO; do
+            [[ -z "$REPO" ]] && continue
+            echo ""
+            echo "=== $ORG/$REPO ==="
+
+            if ! gh api "repos/$ORG/$REPO/contents/js/config.js" > /dev/null 2>&1; then
+              echo "⏩ Geen js/config.js aanwezig, overslaan."
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            TMP=$(mktemp -d)
+
+            EXIT_CODE=0
+            (
+              DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
+                --json defaultBranchRef --jq '.defaultBranchRef.name')
+
+              gh repo clone "$ORG/$REPO" "$TMP" -- --depth=1 --quiet \
+                --branch "$DEFAULT_BRANCH"
+
+              cd "$TMP"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git config user.name "github-actions[bot]"
+
+              rm -rf .github
+              cp -r "$TEMPLATE_GITHUB_DIR" .github
+              find .github -name '.DS_Store' -delete
+              # Verwijder bestanden die alleen in de template thuishoren
+              rm -f .github/workflows/update-workflows.yml
+              rm -f .github/repos.json
+
+              if git diff --quiet && git diff --staged --quiet; then
+                echo "✅ Geen wijzigingen."
+                exit 0
+              fi
+
+              git add .github
+
+              if [[ "$DRY_RUN" == "true" ]]; then
+                echo "🔍 Dry run — gewijzigde bestanden:"
+                git diff --staged --name-only
+                exit 2
+              fi
+
+              git commit -m "chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
+              git push origin "$DEFAULT_BRANCH"
+              echo "✅ Gecommit op $DEFAULT_BRANCH."
+            ) || EXIT_CODE=$?
+
+            case $EXIT_CODE in
+              0) UPDATED=$((UPDATED + 1)) ;;
+              2) WOULD_UPDATE+=("$ORG/$REPO") ;;
+              *) echo "❌ Fout bij $ORG/$REPO"; FAILED=$((FAILED + 1)) ;;
+            esac
+
+            rm -rf "$TMP"
+          done <<< "$REPOS"
+
+          echo ""
+          echo "════════════════════════════════════════"
+          echo "Samenvatting $ORG"
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "  Zou bijwerken: ${#WOULD_UPDATE[@]}"
+            for r in "${WOULD_UPDATE[@]}"; do echo "    - $r"; done
+          else
+            echo "  Bijgewerkt:   $UPDATED"
+          fi
+          echo "  Overgeslagen: $SKIPPED"
+          echo "  Mislukt:      $FAILED"
+          echo "════════════════════════════════════════"
+
+          [[ $FAILED -eq 0 ]] || exit 1
