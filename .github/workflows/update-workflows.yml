@@ -57,6 +57,7 @@ jobs:
           fi
 
           UPDATED=0; SKIPPED=0; FAILED=0
+          WOULD_UPDATE=()
 
           # ── Verwerk elke repo ───────────────────────────────────────────
           while IFS= read -r REPO; do
@@ -72,7 +73,8 @@ jobs:
 
             TMP=$(mktemp -d)
 
-            if ! (
+            EXIT_CODE=0
+            (
               DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
                 --json defaultBranchRef --jq '.defaultBranchRef.name')
 
@@ -100,18 +102,19 @@ jobs:
               if [[ "$DRY_RUN" == "true" ]]; then
                 echo "🔍 Dry run — gewijzigde bestanden:"
                 git diff --staged --name-only
-                exit 0
+                exit 2
               fi
 
               git commit -m "chore: update GitHub Actions workflows vanuit NL-ReSpec-template"
               git push origin "$DEFAULT_BRANCH"
               echo "✅ Gecommit op $DEFAULT_BRANCH."
-            ); then
-              echo "❌ Fout bij $ORG/$REPO"
-              FAILED=$((FAILED + 1))
-            else
-              UPDATED=$((UPDATED + 1))
-            fi
+            ) || EXIT_CODE=$?
+
+            case $EXIT_CODE in
+              0) UPDATED=$((UPDATED + 1)) ;;
+              2) WOULD_UPDATE+=("$ORG/$REPO") ;;
+              *) echo "❌ Fout bij $ORG/$REPO"; FAILED=$((FAILED + 1)) ;;
+            esac
 
             rm -rf "$TMP"
           done <<< "$REPOS"
@@ -119,7 +122,12 @@ jobs:
           echo ""
           echo "════════════════════════════════════════"
           echo "Samenvatting $ORG"
-          echo "  Bijgewerkt:   $UPDATED"
+          if [[ "$DRY_RUN" == "true" ]]; then
+            echo "  Zou bijwerken: ${#WOULD_UPDATE[@]}"
+            for r in "${WOULD_UPDATE[@]}"; do echo "    - $r"; done
+          else
+            echo "  Bijgewerkt:   $UPDATED"
+          fi
           echo "  Overgeslagen: $SKIPPED"
           echo "  Mislukt:      $FAILED"
           echo "════════════════════════════════════════"
