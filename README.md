@@ -129,6 +129,8 @@ automatisch bijgewerkt:
 
 * Repos met `js/config.js` die **nog niet in de lijst staan** worden
   toegevoegd met `"updateAllow": true`
+* Repos met `js/config.js` krijgen ook `respecBuildUrl` en
+  `respecVersion` mee op basis van `index.html` en `snapshot.html`
 * Repos die **gearchiveerd of verwijderd** zijn worden uit de lijst verwijderd
 * De bijgewerkte `repos.json` wordt terug gecommit naar deze template repo
 
@@ -137,7 +139,10 @@ Wil je een repo **uitsluiten** van updates, zet dan
 aangeraakt, ook niet bij toekomstige runs.
 
 Repos met een `config.js` in de root (maar nog niet in `js/`) krijgen een
-aparte PR om dit bestand te verplaatsen naar `js/config.js`.
+aparte PR om dit bestand te verplaatsen naar `js/config.js` en meteen de
+beheerde `.github`-bestanden uit deze template mee te nemen. Zo'n repo
+wordt pas bij een volgende run automatisch aan `repos.json` toegevoegd,
+nadat de migratie-PR is gemerged.
 
 ### Handmatig triggeren
 
@@ -161,8 +166,3 @@ De volgende bestanden worden bijgewerkt:
 * `.github/workflows/main.yml`
 * `.github/workflows/pdf.js`
 * `.github/workflows/publish.yml`
-
-De volgende beheerbestanden blijven alleen in deze template-repo:
-
-* `.github/workflows/update-workflows.yml`
-* `.github/repos.json`

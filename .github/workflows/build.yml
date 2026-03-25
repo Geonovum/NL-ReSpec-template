@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Prepare directories
         run: |
@@ -27,7 +27,7 @@ jobs:
           fi
 
       - name: Validate HTML
-        uses: anishathalye/proof-html@v2
+        uses: anishathalye/proof-html@a76b66427e600c6992e8937a741afffd2264a613 # v2.2.3
         continue-on-error: true
         with:
           directory: ${{ env.CHECK_DIR }}/site
@@ -79,7 +79,7 @@ jobs:
           mv *.pdf static/
 
       - name: Serve snapshot over HTTP
-        uses: Eun/http-server-action@v1
+        uses: Eun/http-server-action@f71cec1321f665652a46c40b6852f8e5a68bfcd4 # v1.0.12
         with:
           directory: ${{ github.workspace }}
           port: 8080
@@ -215,7 +215,7 @@ jobs:
           git push --force-with-lease origin HEAD:"$BRANCH"
 
       - name: Upload snapshot artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: snapshot
           path: |
