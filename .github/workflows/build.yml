@@ -79,24 +79,10 @@ jobs:
           mv *.pdf static/
 
       - name: Serve snapshot over HTTP
-        uses: Eun/http-server-action@f71cec1321f665652a46c40b6852f8e5a68bfcd4 # v1.0.12
-        with:
-          directory: ${{ github.workspace }}
-          port: 8080
-          content-types: |
-            {
-              "css": "text/css",
-              "html": "text/html",
-              "ico": "image/x-icon",
-              "jpeg": "image/jpeg",
-              "jpg": "image/jpeg",
-              "js": "text/javascript",
-              "json": "application/json",
-              "png": "image/png",
-              "svg": "image/svg+xml",
-              "txt": "text/plain",
-              "xml": "text/xml"
-            }
+        run: |
+          cd "${{ github.workspace }}"
+          python3 -m http.server 8080 >/dev/null 2>&1 &
+          echo "SNAPSHOT_SERVER_PID=$!" >> "$GITHUB_ENV"
 
       - name: Ensure Chrome + matching ChromeDriver for WCAG check
         id: browser
@@ -191,6 +177,13 @@ jobs:
             --one-page-only \
             http://localhost:8080/snapshot.html \
             --buffer-size 8192 > $CHECK_DIR/link-check.txt 2>&1 || echo "Geen linkfouten gevonden." > $CHECK_DIR/link-check.txt
+
+      - name: Stop snapshot HTTP server
+        if: always()
+        run: |
+          if [[ -n "${SNAPSHOT_SERVER_PID:-}" ]]; then
+            kill "$SNAPSHOT_SERVER_PID" || true
+          fi
 
       - name: Commit all results
         if: >
