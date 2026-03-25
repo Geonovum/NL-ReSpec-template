@@ -150,8 +150,19 @@ en klik op **"Run workflow"**.
 
 ### Wat wordt bijgewerkt?
 
-De volledige `.github/` map van de template wordt gekopieerd naar elke repo.
-De volgende bestanden worden **niet** meegekopieerd:
+Alleen een vaste set templatebestanden wordt bijgewerkt. Bestaande andere
+bestanden onder `.github/`, zoals extra workflows of templates, blijven
+onaangeraakt.
+
+De volgende bestanden worden bijgewerkt:
+
+* `.github/dependabot.yml`
+* `.github/workflows/build.yml`
+* `.github/workflows/main.yml`
+* `.github/workflows/pdf.js`
+* `.github/workflows/publish.yml`
+
+De volgende beheerbestanden blijven alleen in deze template-repo:
 
 * `.github/workflows/update-workflows.yml`
 * `.github/repos.json`

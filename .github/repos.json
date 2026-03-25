@@ -1,0 +1,274 @@
+{
+  "Geonovum": {
+    "repos": {
+      "whitepaper-standaarden": {
+        "updateAllow": true
+      },
+      "IMVG": {
+        "updateAllow": true
+      },
+      "wfs3-experiments": {
+        "updateAllow": true
+      },
+      "IMG": {
+        "updateAllow": true
+      },
+      "Metadata-handreiking": {
+        "updateAllow": true
+      },
+      "inspire-handreiking": {
+        "updateAllow": true
+      },
+      "praktijkrichtlijn-vector-tiling": {
+        "updateAllow": true
+      },
+      "TstRespec": {
+        "updateAllow": true
+      },
+      "imev-werkomgeving": {
+        "updateAllow": true
+      },
+      "IMROI": {
+        "updateAllow": true
+      },
+      "HR-CRS-Gebruik": {
+        "updateAllow": true
+      },
+      "Geo-standaarden-wijzigingsprotocol": {
+        "updateAllow": true
+      },
+      "raamwerk-geostandaarden": {
+        "updateAllow": true
+      },
+      "VTM": {
+        "updateAllow": true
+      },
+      "ow-IMOW": {
+        "updateAllow": true
+      },
+      "dso-validatiematrix": {
+        "updateAllow": true
+      },
+      "bestuurlijke-gebieden-cm": {
+        "updateAllow": true
+      },
+      "imgolf-werkomgeving": {
+        "updateAllow": true
+      },
+      "IMG-wijzigingsprotocol": {
+        "updateAllow": true
+      },
+      "IMEV-wijzigingsprotocol": {
+        "updateAllow": true
+      },
+      "eu-VerkenningDataspaces": {
+        "updateAllow": true
+      },
+      "IMX-LineageModel": {
+        "updateAllow": true
+      },
+      "IMX-ModelMapping": {
+        "updateAllow": true
+      },
+      "dso-cim-op": {
+        "updateAllow": true
+      },
+      "dso-cim-oi": {
+        "updateAllow": true
+      },
+      "dso-cim-org": {
+        "updateAllow": true
+      },
+      "dso-cim-ow": {
+        "updateAllow": true
+      },
+      "dso-cim-tr": {
+        "updateAllow": true
+      },
+      "IMX-Metadata": {
+        "updateAllow": true
+      },
+      "dso-cim-am": {
+        "updateAllow": true
+      },
+      "dso-cim-bhkv": {
+        "updateAllow": true
+      },
+      "dso-cim-hlp": {
+        "updateAllow": true
+      },
+      "dso-cim-mac": {
+        "updateAllow": true
+      },
+      "dso-cim-pdc": {
+        "updateAllow": true
+      },
+      "dso-cim-swf": {
+        "updateAllow": true
+      },
+      "ogc-api-features-guideline": {
+        "updateAllow": true
+      },
+      "imx-digilab": {
+        "updateAllow": true
+      },
+      "hvd": {
+        "updateAllow": true
+      },
+      "gpkg": {
+        "updateAllow": true
+      },
+      "DCAT-AP-NL30": {
+        "updateAllow": true
+      },
+      "3d-tiling": {
+        "updateAllow": true
+      },
+      "geonovum-allemodellen": {
+        "updateAllow": true
+      },
+      "NL-SBB": {
+        "updateAllow": true
+      },
+      "usecases-for-3dgeosparql": {
+        "updateAllow": true
+      },
+      "imkl-werkomgeving": {
+        "updateAllow": true
+      },
+      "hr-3d-standaarden": {
+        "updateAllow": true
+      },
+      "ibro-scope": {
+        "updateAllow": true
+      },
+      "visiestandaarden": {
+        "updateAllow": true
+      },
+      "Testbed-sensordata": {
+        "updateAllow": true
+      },
+      "mim-uml": {
+        "updateAllow": true
+      },
+      "mim-ld": {
+        "updateAllow": true
+      },
+      "mim-metamodel": {
+        "updateAllow": true
+      },
+      "mim-fbm": {
+        "updateAllow": true
+      },
+      "GeoBIM_Georefereren": {
+        "updateAllow": true
+      },
+      "NL-ReSpec-template": {
+        "updateAllow": false
+      },
+      "ibro-cm": {
+        "updateAllow": true
+      },
+      "IMMOB": {
+        "updateAllow": true
+      },
+      "specref.geostandaarden.nl": {
+        "updateAllow": true
+      },
+      "dcat-ap-nl-wijzigingsprotocol": {
+        "updateAllow": true
+      },
+      "mim-archimate": {
+        "updateAllow": true
+      },
+      "mim-ontouml": {
+        "updateAllow": true
+      },
+      "test_repo": {
+        "updateAllow": true
+      },
+      "respecPublicatieTest": {
+        "updateAllow": true
+      },
+      "vth-cim-flo": {
+        "updateAllow": true
+      },
+      "ibro-lm": {
+        "updateAllow": true
+      },
+      "imev-beheerplan": {
+        "updateAllow": true
+      },
+      "geonovum-dashboard": {
+        "updateAllow": true
+      },
+      "mim-lineage": {
+        "updateAllow": true
+      },
+      "bestuurlijke-gebieden-lm": {
+        "updateAllow": true
+      },
+      "vth-dim-vergunning-llm": {
+        "updateAllow": true
+      },
+      "ReSpec-oefen": {
+        "updateAllow": true
+      },
+      "ReSpec-debug": {
+        "updateAllow": true
+      },
+      "GeoBIM_BIM_naar_Geo": {
+        "updateAllow": true
+      },
+      "geooptijd": {
+        "updateAllow": true
+      },
+      "KBI-WOZ-advies": {
+        "updateAllow": true
+      },
+      "3d-standaard-rapport": {
+        "updateAllow": true
+      },
+      "TransparantieApp": {
+        "updateAllow": true
+      },
+      "geen-respec": {
+        "updateAllow": true
+      },
+      "nl-sbb-bp": {
+        "updateAllow": true
+      },
+      "geonovum-datatypen": {
+        "updateAllow": true
+      },
+      "mim-datatypen": {
+        "updateAllow": true
+      },
+      "iso-19107-datatypen": {
+        "updateAllow": true
+      }
+    }
+  },
+  "BROprogramma": {
+    "repos": {
+      "BHR-G": {
+        "updateAllow": true
+      },
+      "BHR-GT": {
+        "updateAllow": true
+      },
+      "GMW": {
+        "updateAllow": true
+      },
+      "SAD": {
+        "updateAllow": true
+      },
+      "SLD": {
+        "updateAllow": true
+      },
+      "_temp_imagemaps": {
+        "updateAllow": true
+      }
+    }
+  }
+}
