@@ -48,9 +48,68 @@ jobs:
           REPOS_FILE=".github/repos.json"
           UPDATED_JSON=$(cat "$REPOS_FILE")
 
+          fetch_raw_file() {
+            local org="$1"
+            local repo="$2"
+            local path="$3"
+            local token="$4"
+
+            GH_TOKEN="$token" gh api \
+              -H "Accept: application/vnd.github.raw" \
+              "repos/$org/$repo/contents/$path" 2>/dev/null || true
+          }
+
+          extract_respec_build_url() {
+            printf '%s' "$1" \
+              | grep -oE 'src="[^"]+"' \
+              | sed 's/^src="//; s/"$//' \
+              | grep 'respec' \
+              | grep -v 'respec-mermaid' \
+              | grep -v '/config/' \
+              | grep -v 'config.js' \
+              | head -n1 || true
+          }
+
+          extract_respec_version() {
+            printf '%s' "$1" \
+              | tr '\n' ' ' \
+              | sed -nE 's/.*<meta name="generator" content="ReSpec ([^"]+)".*/\1/p' \
+              | head -n1 || true
+          }
+
+          upsert_repo_metadata() {
+            local org="$1"
+            local repo="$2"
+            local default_allow="$3"
+            local build_url="$4"
+            local version="$5"
+
+            UPDATED_JSON=$(echo "$UPDATED_JSON" | jq \
+              --arg org "$org" \
+              --arg repo "$repo" \
+              --argjson update_allow "$default_allow" \
+              --arg build_url "$build_url" \
+              --arg version "$version" \
+              '.[$org].repos[$repo] = (
+                ((.[$org].repos[$repo] // {})
+                  | if has("updateAllow") then . else . + { updateAllow: $update_allow } end)
+                + {
+                    respecBuildUrl: (if $build_url == "" then null else $build_url end),
+                    respecVersion: (if $version == "" then null else $version end)
+                  }
+              )')
+          }
+
           scan_org() {
             local ORG="$1"
             local GH_TOKEN="$2"
+            local EXISTS
+            local CURRENT
+            local INDEX_HTML
+            local SNAPSHOT_HTML
+            local RESPEC_BUILD_URL
+            local RESPEC_VERSION
+            local -a ACTIVE_REPOS=()
 
             if [[ -z "$GH_TOKEN" ]]; then
               echo "⚠️  Geen token voor $ORG, sync overgeslagen."
@@ -75,7 +134,6 @@ jobs:
             )
 
             # Filter: alleen repos met js/config.js
-            ACTIVE_REPOS=()
             while IFS= read -r REPO; do
               [[ -z "$REPO" || "$REPO" == ".github" ]] && continue
 
@@ -87,6 +145,20 @@ jobs:
               if GH_TOKEN="$GH_TOKEN" gh api \
                 "repos/$ORG/$REPO/contents/js/config.js" > /dev/null 2>&1; then
                 ACTIVE_REPOS+=("$REPO")
+
+                EXISTS=$(echo "$UPDATED_JSON" | jq -r --arg org "$ORG" --arg repo "$REPO" \
+                  '.[$org].repos | has($repo)')
+                if [[ "$EXISTS" == "false" ]]; then
+                  echo "➕ Nieuw: $ORG/$REPO"
+                fi
+
+                INDEX_HTML=$(fetch_raw_file "$ORG" "$REPO" "index.html" "$GH_TOKEN")
+                SNAPSHOT_HTML=$(fetch_raw_file "$ORG" "$REPO" "snapshot.html" "$GH_TOKEN")
+                RESPEC_BUILD_URL=$(extract_respec_build_url "$INDEX_HTML")
+                RESPEC_VERSION=$(extract_respec_version "$SNAPSHOT_HTML")
+
+                upsert_repo_metadata "$ORG" "$REPO" "true" \
+                  "$RESPEC_BUILD_URL" "$RESPEC_VERSION"
               fi
             done <<< "$ALL_REPOS"
 
@@ -96,26 +168,30 @@ jobs:
               if [[ "$EXISTS" == "false" ]]; then
                 echo "➕ Template repo toegevoegd met updateAllow: false: $ORG/$SELF_REPO"
               fi
+
+              INDEX_HTML=$(cat index.html 2>/dev/null || true)
+              SNAPSHOT_HTML=$(cat snapshot.html 2>/dev/null || true)
+              RESPEC_BUILD_URL=$(extract_respec_build_url "$INDEX_HTML")
+              RESPEC_VERSION=$(extract_respec_version "$SNAPSHOT_HTML")
+
               UPDATED_JSON=$(echo "$UPDATED_JSON" | jq \
-                --arg org "$ORG" --arg repo "$SELF_REPO" \
-                '.[$org].repos[$repo] = { "updateAllow": false }')
+                --arg org "$ORG" \
+                --arg repo "$SELF_REPO" \
+                --arg build_url "$RESPEC_BUILD_URL" \
+                --arg version "$RESPEC_VERSION" \
+                '.[$org].repos[$repo] = (
+                  (.[$org].repos[$repo] // {})
+                  + {
+                      updateAllow: false,
+                      respecBuildUrl: (if $build_url == "" then null else $build_url end),
+                      respecVersion: (if $version == "" then null else $version end)
+                    }
+                )')
             fi
 
             # Huidige repos uit JSON
             CURRENT=$(echo "$UPDATED_JSON" | jq -r --arg org "$ORG" \
               '.[$org].repos | keys[]' 2>/dev/null || true)
-
-            # Voeg nieuwe repos toe (updateAllow: true)
-            for REPO in "${ACTIVE_REPOS[@]}"; do
-              EXISTS=$(echo "$UPDATED_JSON" | jq -r --arg org "$ORG" --arg repo "$REPO" \
-                '.[$org].repos | has($repo)')
-              if [[ "$EXISTS" == "false" ]]; then
-                echo "➕ Nieuw: $ORG/$REPO"
-                UPDATED_JSON=$(echo "$UPDATED_JSON" | jq \
-                  --arg org "$ORG" --arg repo "$REPO" \
-                  '.[$org].repos[$repo] = { "updateAllow": true }')
-              fi
-            done
 
             # Verwijder repos die niet meer actief zijn
             while IFS= read -r REPO; do
@@ -208,9 +284,133 @@ jobs:
              | .key' \
             .github/repos.json)
 
-          UPDATED=0; SKIPPED=0; FAILED=0
+          list_org_repos() {
+            page=1
+            while true; do
+              batch=$(GH_TOKEN="$GH_TOKEN" gh api \
+                "orgs/$ORG/repos?per_page=100&page=$page&type=all" \
+                --jq '.[] | select(.archived == false and .disabled == false) | .name' \
+                2>/dev/null || true)
+              [[ -z "$batch" ]] && break
+              echo "$batch"
+              page=$((page + 1))
+            done
+          }
+
+          create_config_migration_pr() {
+            local repo="$1"
+            local pr_title="chore: verplaats config.js naar js/config.js en update workflows"
+            local pr_body
+            local tmp_cfg
+            local exit_code_cfg=0
+
+            pr_body=$'Deze PR migreert de repository naar de actuele NL-ReSpec-template structuur.\n\nWijzigingen:\n- verplaatst `config.js` naar `js/config.js`\n- voegt de beheerde GitHub Actions workflows uit de template toe of werkt ze bij\n\nNa merge wordt de repo bij een volgende run automatisch opgenomen in `repos.json`, omdat `js/config.js` dan aanwezig is.'
+
+            echo "📦 config.js in root, nog niet in js/ — migratie-PR voorbereiden."
+
+            if [[ "$DRY_RUN" == "true" ]]; then
+              CONFIG_MOVE_PRS+=("$ORG/$repo (config.js → js/config.js + .github)")
+              return 0
+            fi
+
+            tmp_cfg=$(mktemp -d)
+            (
+              local default_branch
+              local move_branch
+              local existing
+              local rel_path
+              local -a git_add_paths=()
+
+              default_branch=$(gh repo view "$ORG/$repo" \
+                --json defaultBranchRef --jq '.defaultBranchRef.name')
+              gh repo clone "$ORG/$repo" "$tmp_cfg" -- --depth=1 --quiet \
+                --branch "$default_branch"
+              cd "$tmp_cfg"
+              git remote set-url origin \
+                "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${repo}.git"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git config user.name "github-actions[bot]"
+
+              move_branch="chore/verplaats-config-js-naar-js-map"
+              git checkout -b "$move_branch"
+
+              mkdir -p js
+              git mv config.js js/config.js
+
+              for rel_path in "${MANAGED_FILES[@]}"; do
+                mkdir -p "$(dirname ".github/$rel_path")"
+                cp "$TEMPLATE_GITHUB_DIR/$rel_path" ".github/$rel_path"
+                git_add_paths+=(".github/$rel_path")
+              done
+              find .github -name '.DS_Store' -delete
+
+              git add -- "${git_add_paths[@]}" js/config.js config.js
+
+              if git diff --staged --quiet; then
+                echo "✅ Geen wijzigingen voor migratie-PR."
+                exit 0
+              fi
+
+              git commit -m "chore: verplaats config.js naar js/config.js en update workflows"
+              git push origin "$move_branch" --force
+
+              existing=$(gh pr list \
+                --repo "$ORG/$repo" \
+                --head "$move_branch" \
+                --state open \
+                --json number \
+                --jq '.[0].number' 2>/dev/null || true)
+
+              if [[ -n "$existing" ]]; then
+                gh pr edit "$existing" \
+                  --repo "$ORG/$repo" \
+                  --title "$pr_title" \
+                  --body "$pr_body" > /dev/null
+                echo "🔄 PR #$existing bijgewerkt."
+              else
+                gh pr create \
+                  --repo "$ORG/$repo" \
+                  --title "$pr_title" \
+                  --body "$pr_body" \
+                  --base "$default_branch" \
+                  --head "$move_branch" > /dev/null
+                echo "✅ PR aangemaakt."
+              fi
+            ) || exit_code_cfg=$?
+            rm -rf "$tmp_cfg"
+
+            return "$exit_code_cfg"
+          }
+
+          UPDATED=0; SKIPPED=0; FAILED=0; MIGRATION_PRS=0
           WOULD_UPDATE=()
           CONFIG_MOVE_PRS=()
+
+          ALL_REPOS=$(list_org_repos)
+
+          while IFS= read -r REPO; do
+            [[ -z "$REPO" || "$REPO" == ".github" ]] && continue
+
+            if [[ "$ORG" == "$SELF_OWNER" && "$REPO" == "$SELF_REPO" ]]; then
+              continue
+            fi
+
+            HAS_JS_CONFIG=$(gh api "repos/$ORG/$REPO/contents/js/config.js" \
+              > /dev/null 2>&1 && echo "true" || echo "false")
+            HAS_ROOT_CONFIG=$(gh api "repos/$ORG/$REPO/contents/config.js" \
+              > /dev/null 2>&1 && echo "true" || echo "false")
+
+            if [[ "$HAS_ROOT_CONFIG" == "true" && "$HAS_JS_CONFIG" == "false" ]]; then
+              echo ""
+              echo "=== $ORG/$REPO ==="
+              if create_config_migration_pr "$REPO"; then
+                MIGRATION_PRS=$((MIGRATION_PRS + 1))
+              else
+                echo "❌ Fout bij $ORG/$REPO"
+                FAILED=$((FAILED + 1))
+              fi
+            fi
+          done <<< "$ALL_REPOS"
 
           while IFS= read -r REPO; do
             [[ -z "$REPO" || "$REPO" == ".github" ]] && continue
@@ -229,55 +429,8 @@ jobs:
             HAS_ROOT_CONFIG=$(gh api "repos/$ORG/$REPO/contents/config.js" \
               > /dev/null 2>&1 && echo "true" || echo "false")
 
-            # ── config.js in root → PR aanmaken om te verplaatsen ──────────
             if [[ "$HAS_ROOT_CONFIG" == "true" && "$HAS_JS_CONFIG" == "false" ]]; then
-              echo "📦 config.js in root, nog niet in js/ — PR aanmaken."
-              if [[ "$DRY_RUN" == "true" ]]; then
-                CONFIG_MOVE_PRS+=("$ORG/$REPO (config.js → js/config.js)")
-              else
-                TMP_CFG=$(mktemp -d)
-                EXIT_CODE_CFG=0
-                (
-                  DEFAULT_BRANCH=$(gh repo view "$ORG/$REPO" \
-                    --json defaultBranchRef --jq '.defaultBranchRef.name')
-                  gh repo clone "$ORG/$REPO" "$TMP_CFG" -- --depth=1 --quiet \
-                    --branch "$DEFAULT_BRANCH"
-                  cd "$TMP_CFG"
-                  git remote set-url origin \
-                    "https://x-access-token:${GH_TOKEN}@github.com/${ORG}/${REPO}.git"
-                  git config user.email "github-actions[bot]@users.noreply.github.com"
-                  git config user.name "github-actions[bot]"
-
-                  MOVE_BRANCH="chore/verplaats-config-js-naar-js-map"
-                  git checkout -b "$MOVE_BRANCH"
-
-                  mkdir -p js
-                  git mv config.js js/config.js
-                  git commit -m "chore: verplaats config.js naar js/config.js"
-                  git push origin "$MOVE_BRANCH" --force
-
-                  EXISTING=$(gh pr list \
-                    --repo "$ORG/$REPO" \
-                    --head "$MOVE_BRANCH" \
-                    --state open \
-                    --json number \
-                    --jq '.[0].number' 2>/dev/null || true)
-
-                  if [[ -n "$EXISTING" ]]; then
-                    echo "🔄 PR #$EXISTING al aanwezig."
-                  else
-                    gh pr create \
-                      --repo "$ORG/$REPO" \
-                      --title "chore: verplaats config.js naar js/config.js" \
-                      --body "De \`config.js\` staat in de root. Deze PR verplaatst het naar \`js/config.js\` conform de NL-ReSpec-template structuur." \
-                      --base "$DEFAULT_BRANCH" \
-                      --head "$MOVE_BRANCH"
-                    echo "✅ PR aangemaakt."
-                  fi
-                ) || EXIT_CODE_CFG=$?
-                rm -rf "$TMP_CFG"
-                [[ $EXIT_CODE_CFG -ne 0 ]] && { echo "❌ Fout bij $ORG/$REPO"; FAILED=$((FAILED + 1)); }
-              fi
+              echo "⏩ Root-level config.js; migratie-PR wordt centraal afgehandeld."
               SKIPPED=$((SKIPPED + 1))
               continue
             fi
@@ -344,10 +497,11 @@ jobs:
           if [[ "$DRY_RUN" == "true" ]]; then
             echo "  Zou bijwerken (.github):     ${#WOULD_UPDATE[@]}"
             for r in "${WOULD_UPDATE[@]}"; do echo "    - $r"; done
-            echo "  Zou PR aanmaken (config.js): ${#CONFIG_MOVE_PRS[@]}"
+            echo "  Zou migratie-PRs maken:      ${#CONFIG_MOVE_PRS[@]}"
             for r in "${CONFIG_MOVE_PRS[@]}"; do echo "    - $r"; done
           else
-            echo "  Bijgewerkt:   $UPDATED"
+            echo "  Bijgewerkt (.github): $UPDATED"
+            echo "  Migratie-PRs:        $MIGRATION_PRS"
           fi
           echo "  Overgeslagen: $SKIPPED"
           echo "  Mislukt:      $FAILED"
