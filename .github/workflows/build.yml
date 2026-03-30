@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Prepare directories
         run: |
@@ -27,7 +27,7 @@ jobs:
           fi
 
       - name: Validate HTML
-        uses: anishathalye/proof-html@v2
+        uses: anishathalye/proof-html@a76b66427e600c6992e8937a741afffd2264a613 # v2.2.3
         continue-on-error: true
         with:
           directory: ${{ env.CHECK_DIR }}/site
@@ -79,30 +79,39 @@ jobs:
           mv *.pdf static/
 
       - name: Serve snapshot over HTTP
-        uses: Eun/http-server-action@v1
-        with:
-          directory: ${{ github.workspace }}
-          port: 8080
-          content-types: |
-            {
-              "css": "text/css",
-              "html": "text/html",
-              "ico": "image/x-icon",
-              "jpeg": "image/jpeg",
-              "jpg": "image/jpeg",
-              "js": "text/javascript",
-              "json": "application/json",
-              "png": "image/png",
-              "svg": "image/svg+xml",
-              "txt": "text/plain",
-              "xml": "text/xml"
-            }
-
-      - name: Ensure latest Chrome for WCAG check
         run: |
+          cd "${{ github.workspace }}"
+          python3 -m http.server 8080 >/dev/null 2>&1 &
+          echo "SNAPSHOT_SERVER_PID=$!" >> "$GITHUB_ENV"
+
+      - name: Ensure Chrome + matching ChromeDriver for WCAG check
+        id: browser
+        run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          google-chrome --version
+          sudo apt-get install -y google-chrome-stable unzip
+
+          CHROME_BIN="$(command -v google-chrome || command -v google-chrome-stable)"
+          CHROME_VERSION="$("$CHROME_BIN" --version | grep -oE '[0-9]+(\.[0-9]+){1,3}' | head -1)"
+          CHROME_MAJOR="${CHROME_VERSION%%.*}"
+          echo "Detected Chrome version: $CHROME_VERSION"
+
+          CHROMEDRIVER_VERSION="$(curl -fsSL "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_MAJOR}")"
+          echo "Using ChromeDriver version: $CHROMEDRIVER_VERSION"
+
+          curl -fsSL \
+            -o /tmp/chromedriver-linux64.zip \
+            "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip"
+          rm -rf /tmp/chromedriver-linux64
+          unzip -qo /tmp/chromedriver-linux64.zip -d /tmp
+          sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
+
+          "$CHROME_BIN" --version
+          /usr/local/bin/chromedriver --version
+
+          echo "chrome_bin=$CHROME_BIN" >> "$GITHUB_OUTPUT"
+          echo "chromedriver_bin=/usr/local/bin/chromedriver" >> "$GITHUB_OUTPUT"
 
       - name: Run WCAG 2.2 check
         run: |
@@ -115,35 +124,43 @@ jobs:
           curl -sf http://localhost:8080/snapshot.html > /dev/null || (echo "Local HTTP server on 8080 not reachable"; exit 1)
 
           set -o pipefail
+          RAW_WCAG="$CHECK_DIR/wcag-raw.json"
           if npx --yes @axe-core/cli@latest --stdout \
+            --chrome-path "${{ steps.browser.outputs.chrome_bin }}" \
+            --chromedriver-path "${{ steps.browser.outputs.chromedriver_bin }}" \
             --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22a,wcag22aa \
-            http://localhost:8080/snapshot.html \
-            | jq '
-                [
-                  .[] as $page |
-                  $page.violations[] |
-                  {
-                    url: $page.url,
-                    id,
-                    impact,
-                    description,
-                    helpUrl,
-                    nodes: [
-                      .nodes[] |
-                      {
-                        target,
-                        html,
-                        failureSummary
-                      }
-                    ]
-                  }
-                ]
-              ' > $CHECK_DIR/wcag-report.json; then
-            echo "WCAG output saved to $CHECK_DIR/wcag-report.json"
+            http://localhost:8080/snapshot.html > "$RAW_WCAG"; then
+            if jq '
+                  [
+                    .[] as $page |
+                    $page.violations[] |
+                    {
+                      url: $page.url,
+                      id,
+                      impact,
+                      description,
+                      helpUrl,
+                      nodes: [
+                        .nodes[] |
+                        {
+                          target,
+                          html,
+                          failureSummary
+                        }
+                      ]
+                    }
+                  ]
+                ' "$RAW_WCAG" > $CHECK_DIR/wcag-report.json; then
+              echo "WCAG output saved to $CHECK_DIR/wcag-report.json"
+            else
+              echo "{\"error\":\"WCAG-check mislukt: axe-output was geen geldige JSON. Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
+              echo "WCAG output saved to $CHECK_DIR/wcag-report.json (error)"
+            fi
           else
             echo "{\"error\":\"WCAG-check mislukt (axe-cli). Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
             echo "WCAG output saved to $CHECK_DIR/wcag-report.json (error)"
           fi
+          rm -f "$RAW_WCAG"
 
       - name: Run link check with Muffet
         run: |
@@ -160,6 +177,13 @@ jobs:
             --one-page-only \
             http://localhost:8080/snapshot.html \
             --buffer-size 8192 > $CHECK_DIR/link-check.txt 2>&1 || echo "Geen linkfouten gevonden." > $CHECK_DIR/link-check.txt
+
+      - name: Stop snapshot HTTP server
+        if: always()
+        run: |
+          if [[ -n "${SNAPSHOT_SERVER_PID:-}" ]]; then
+            kill "$SNAPSHOT_SERVER_PID" || true
+          fi
 
       - name: Commit all results
         if: >
@@ -184,7 +208,7 @@ jobs:
           git push --force-with-lease origin HEAD:"$BRANCH"
 
       - name: Upload snapshot artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: snapshot
           path: |

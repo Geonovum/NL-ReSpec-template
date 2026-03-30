@@ -113,3 +113,56 @@ https://test.docs.geostandaarden.nl/
 
 Na goedkeuring van de PR wordt het document gepubliceerd op:
 https://docs.geostandaarden.nl/
+
+---
+
+## Workflows updaten in document-repos
+
+De GitHub Actions workflows in alle document-repositories kunnen centraal
+bijgewerkt worden vanuit deze template via de workflow
+**"Update workflows in document repos"**.
+
+### Repos bijhouden (automatisch)
+
+Bij elke run wordt [`.github/repos.json`](.github/repos.json) eerst
+automatisch bijgewerkt:
+
+* Repos met `js/config.js` die **nog niet in de lijst staan** worden
+  toegevoegd met `"updateAllow": true`
+* Repos met `js/config.js` krijgen ook `respecBuildUrl` en
+  `respecVersion` mee op basis van `index.html` en `snapshot.html`
+* Repos die **gearchiveerd of verwijderd** zijn worden uit de lijst verwijderd
+* De bijgewerkte `repos.json` wordt terug gecommit naar deze template repo
+
+Wil je een repo **uitsluiten** van updates, zet dan
+`"updateAllow": false` in `repos.json`. Die repo wordt dan nooit meer
+aangeraakt, ook niet bij toekomstige runs.
+
+Repos met een `config.js` in de root (maar nog niet in `js/`) krijgen een
+aparte PR om dit bestand te verplaatsen naar `js/config.js` en meteen de
+beheerde `.github`-bestanden uit deze template mee te nemen. Zo'n repo
+wordt pas bij een volgende run automatisch aan `repos.json` toegevoegd,
+nadat de migratie-PR is gemerged.
+
+### Handmatig triggeren
+
+Ga naar
+[Actions → Update workflows in document repos](https://github.com/Geonovum/NL-ReSpec-template/actions/workflows/update-workflows.yml)
+en klik op **"Run workflow"**.
+
+* **Dry run** aanvinken om te zien welke repos bijgewerkt zouden worden,
+  zonder te committen of PRs aan te maken.
+
+### Wat wordt bijgewerkt?
+
+Alleen een vaste set templatebestanden wordt bijgewerkt. Bestaande andere
+bestanden onder `.github/`, zoals extra workflows of templates, blijven
+onaangeraakt.
+
+De volgende bestanden worden bijgewerkt:
+
+* `.github/dependabot.yml`
+* `.github/workflows/build.yml`
+* `.github/workflows/main.yml`
+* `.github/workflows/pdf.js`
+* `.github/workflows/publish.yml`
