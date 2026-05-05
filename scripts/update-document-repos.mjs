@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, mkdtempSync, renameSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, renameSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
@@ -11,12 +11,13 @@ import {
 } from "./lib/workflow-utils.mjs";
 
 const MANAGED_FILES = [
-  "dependabot.yml",
   "workflows/build.yml",
   "workflows/main.yml",
   "workflows/pdf.js",
   "workflows/publish.yml",
 ];
+
+const REMOVED_MANAGED_FILES = ["dependabot.yml"];
 
 const args = parseArgs(process.argv.slice(2));
 const org = requireArg(args, "org");
@@ -56,6 +57,20 @@ function copyManagedFiles(targetRepoDir) {
   }
 
   return stagedPaths;
+}
+
+function removeDeprecatedManagedFiles(targetRepoDir) {
+  const changedPaths = [];
+
+  for (const relativePath of REMOVED_MANAGED_FILES) {
+    const target = path.join(targetRepoDir, ".github", relativePath);
+    if (existsSync(target)) {
+      rmSync(target, { force: true });
+      changedPaths.push(path.join(".github", relativePath));
+    }
+  }
+
+  return changedPaths;
 }
 
 function gitDiffHasChanges(cwd) {
@@ -164,9 +179,10 @@ async function createConfigMigrationPr(repo) {
     renameSync(path.join(repoDir, "config.js"), path.join(repoDir, "js", "config.js"));
 
     const stagedPaths = copyManagedFiles(repoDir);
+    const removedPaths = removeDeprecatedManagedFiles(repoDir);
     runCommand(
       "git",
-      ["add", "-A", "--", "config.js", "js/config.js", ...stagedPaths],
+      ["add", "-A", "--", "config.js", "js/config.js", ...stagedPaths, ...removedPaths],
       {
         cwd: repoDir,
         description: "git add migratiebestanden",
@@ -222,7 +238,8 @@ async function updateManagedFiles(repo) {
     configureGit(repoDir);
 
     const stagedPaths = copyManagedFiles(repoDir);
-    runCommand("git", ["add", "--", ...stagedPaths], {
+    const removedPaths = removeDeprecatedManagedFiles(repoDir);
+    runCommand("git", ["add", "-A", "--", ...stagedPaths, ...removedPaths], {
       cwd: repoDir,
       description: "git add workflowbestanden",
     });
