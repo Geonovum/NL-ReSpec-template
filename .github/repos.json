@@ -19,7 +19,7 @@
       "IMG": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "Metadata-handreiking": {
         "updateAllow": true,
@@ -59,7 +59,7 @@
       "Geo-standaarden-wijzigingsprotocol": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "raamwerk-geostandaarden": {
         "updateAllow": true,
@@ -74,7 +74,7 @@
       "ow-IMOW": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "dso-validatiematrix": {
         "updateAllow": true,
@@ -98,8 +98,8 @@
       },
       "IMEV-wijzigingsprotocol": {
         "updateAllow": true,
-        "respecBuildUrl": "https://tools.geostandaarden.nl/respec/builds/respec-geonovum.js",
-        "respecVersion": "24.5.2"
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "35.6.1"
       },
       "eu-VerkenningDataspaces": {
         "updateAllow": true,
@@ -179,7 +179,7 @@
       "ogc-api-features-guideline": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "imx-digilab": {
         "updateAllow": true,
@@ -189,7 +189,7 @@
       "hvd": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "gpkg": {
         "updateAllow": true,
@@ -199,7 +199,7 @@
       "DCAT-AP-NL30": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.3.0"
+        "respecVersion": "35.8.0"
       },
       "3d-tiling": {
         "updateAllow": true,
@@ -259,7 +259,7 @@
       "mim-metamodel": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "mim-fbm": {
         "updateAllow": true,
@@ -269,12 +269,12 @@
       "GeoBIM_Georefereren": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "NL-ReSpec-template": {
         "updateAllow": false,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "ibro-cm": {
         "updateAllow": true,
@@ -284,7 +284,7 @@
       "IMMOB": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "specref.geostandaarden.nl": {
         "updateAllow": true,
@@ -319,7 +319,7 @@
       "vth-cim-flo": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "ibro-lm": {
         "updateAllow": true,
@@ -344,7 +344,7 @@
       "bestuurlijke-gebieden-lm": {
         "updateAllow": true,
         "respecBuildUrl": "js/modeldesk-respec.js?v=3",
-        "respecVersion": "35.4.1"
+        "respecVersion": "35.6.1"
       },
       "vth-dim-vergunning-llm": {
         "updateAllow": true,
@@ -384,12 +384,12 @@
       "TransparantieApp": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.4.1"
+        "respecVersion": "35.8.0"
       },
       "geen-respec": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "nl-sbb-bp": {
         "updateAllow": true,
@@ -410,6 +410,41 @@
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
         "respecVersion": "35.6.1"
+      },
+      "word2markdown-handleiding-1": {
+        "updateAllow": true,
+        "respecBuildUrl": null,
+        "respecVersion": null
+      },
+      "word2werkversie-handleiding-1": {
+        "updateAllow": true,
+        "respecBuildUrl": null,
+        "respecVersion": null
+      },
+      "word2werkversie-handleiding": {
+        "updateAllow": true,
+        "respecBuildUrl": null,
+        "respecVersion": null
+      },
+      "word2markdown-handleiding": {
+        "updateAllow": true,
+        "respecBuildUrl": null,
+        "respecVersion": null
+      },
+      "TransparantieApp-Gebruikers-Onderzoek-UX": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "35.8.0"
+      },
+      "TransparantieApp-Applicatie-Architectuur": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "35.8.0"
+      },
+      "testbed-sensordata-2026": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "35.8.0"
       }
     }
   },
@@ -418,32 +453,42 @@
       "BHR-G": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "BHR-GT": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "GMW": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "SAD": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "SLD": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.6.1"
+        "respecVersion": "35.8.0"
       },
       "_temp_imagemaps": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
         "respecVersion": "35.6.1"
+      },
+      "GAR": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "24.5.2"
+      },
+      "GMN": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "24.5.2"
       }
     }
   }
