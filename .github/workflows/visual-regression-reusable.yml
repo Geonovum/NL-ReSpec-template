@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: "0.01"
+      ignore_selectors:
+        description: Comma or newline separated CSS selectors to hide before screenshots
+        required: false
+        type: string
+        default: ""
       fail_on_difference:
         description: Fail the workflow when a viewport exceeds diff_threshold
         required: false
@@ -55,6 +60,10 @@ on:
         description: Difference ratio above which a viewport is marked changed
         required: false
         default: "0.01"
+      ignore_selectors:
+        description: Comma or newline separated CSS selectors to hide before screenshots
+        required: false
+        default: ""
       fail_on_difference:
         description: Fail the workflow when a viewport exceeds diff_threshold
         required: false
@@ -203,6 +212,7 @@ jobs:
         env:
           SNAPSHOT: ${{ inputs.snapshot }}
           DIFF_THRESHOLD: ${{ inputs.diff_threshold }}
+          IGNORE_SELECTORS: ${{ inputs.ignore_selectors }}
           FAIL_ON_DIFFERENCE: ${{ inputs.fail_on_difference }}
         run: |
           set -euo pipefail
@@ -216,6 +226,7 @@ jobs:
             --out-dir "$GITHUB_WORKSPACE/$WORK_DIR/report" \
             --path "$SNAPSHOT" \
             --threshold "$DIFF_THRESHOLD" \
+            --ignore-selectors "$IGNORE_SELECTORS" \
             --fail-on-difference "$FAIL_ON_DIFFERENCE"
 
           cat "$GITHUB_WORKSPACE/$WORK_DIR/report/summary.md" >> "$GITHUB_STEP_SUMMARY"
