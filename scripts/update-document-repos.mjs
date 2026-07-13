@@ -15,6 +15,7 @@ const MANAGED_FILES = [
   "workflows/main.yml",
   "workflows/pdf.js",
   "workflows/publish.yml",
+  "workflows/visual-regression.yml",
 ];
 
 const REMOVED_MANAGED_FILES = ["dependabot.yml"];
