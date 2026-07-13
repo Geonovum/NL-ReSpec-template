@@ -152,7 +152,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build ReSpec snapshots
+      - name: Prepare ReSpec snapshots
         shell: bash
         env:
           SOURCE: ${{ inputs.source }}
@@ -175,7 +175,13 @@ jobs:
             npx --yes respec --localhost --src "$SOURCE" --out "$SNAPSHOT"
           }
 
-          build_snapshot "base" "$WORK_DIR/base"
+          if [[ -f "$GITHUB_WORKSPACE/$WORK_DIR/base/$SNAPSHOT" ]]; then
+            echo "Using committed base snapshot: $SNAPSHOT"
+          else
+            echo "Base snapshot missing; building fallback base snapshot."
+            build_snapshot "base" "$WORK_DIR/base"
+          fi
+
           build_snapshot "head" "$WORK_DIR/head"
 
       - name: Install comparison tooling
