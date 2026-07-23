@@ -270,7 +270,12 @@ jobs:
             git add *.pdf
           fi
 
-          git commit -m "Snapshot + checks gegenereerd" || echo "No changes to commit"
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Snapshot + checks gegenereerd"
 
           TARGET_BRANCH="${{ steps.commit-target.outputs.target_branch }}"
           git push origin HEAD:"$TARGET_BRANCH"
