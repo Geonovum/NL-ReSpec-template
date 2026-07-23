@@ -181,7 +181,7 @@ jobs:
               exit 1
             fi
 
-            npx --yes respec --localhost --src "$SOURCE" --out "$SNAPSHOT"
+            npx --yes respec --localhost --disable-sandbox --src "$SOURCE" --out "$SNAPSHOT"
           }
 
           if [[ -f "$GITHUB_WORKSPACE/$WORK_DIR/base/$SNAPSHOT" ]]; then
