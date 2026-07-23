@@ -73,7 +73,7 @@ on:
 jobs:
   visual-regression:
     name: Compare ReSpec snapshots
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     env:
@@ -138,28 +138,28 @@ jobs:
           echo "Tooling ref: $TOOLING_REF"
 
       - name: Checkout base
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.refs.outputs.base_ref }}
           path: ${{ env.WORK_DIR }}/base
 
       - name: Checkout head
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.refs.outputs.head_ref }}
           path: ${{ env.WORK_DIR }}/head
 
       - name: Checkout visual regression tooling
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ steps.tooling.outputs.repository }}
           ref: ${{ steps.tooling.outputs.ref }}
           path: ${{ env.WORK_DIR }}/template
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Prepare ReSpec snapshots
         shell: bash
@@ -232,7 +232,7 @@ jobs:
           cat "$GITHUB_WORKSPACE/$WORK_DIR/report/summary.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload visual regression report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: visual-regression-report
