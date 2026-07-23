@@ -106,7 +106,7 @@ var organisationConfig = {
       wv: `Dit is een werkversie die op elk moment kan worden gewijzigd, verwijderd of vervangen door andere documenten. Het is geen stabiel document.`,
       cv: `Dit is een consultatieversie.`,
       vv: `Dit is de definitieve conceptversie van dit document. Wijzigingen naar aanleiding van consultaties zijn doorgevoerd.`,
-      basis: "Dit is een document zonder officiÃ«le status.",
+      basis: "Dit is een document zonder officiële status.",
       ld: "Dit is een levend document dat regelmatig gewijzigd wordt.",
     },
     en: {
