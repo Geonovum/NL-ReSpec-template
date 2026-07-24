@@ -1258,7 +1258,7 @@ export function loadRespecWithConfiguration(localConfig) {
       //     utils.showError(`companyURL of an editor/author must link to a website of an organisation (not GitHub), instead it was ${person.companyURL}`);
       //   }
       // }
-    },
+    } //,
     // (config, document, utils) => {
     //   if (config.specStatus.toLowerCase() !== 'cv') {
     //     return;
@@ -1302,24 +1302,24 @@ export function loadRespecWithConfiguration(localConfig) {
     //   prependSectionToBodyAndCreateIfNotExists(document, 'conformance');
     //   prependSectionToBodyAndCreateIfNotExists(document, 'sotd');
     // },
-    (config, document, utils) => {
-      if (!config.alternateFormats) {
-        config.alternateFormats = [];
-      }
-      // const pdfName = `${config.pubDomain}-${config.shortName}-${config.publishVersion}.pdf`;
-      // const existingFormat = config.alternateFormats.find(format => format.label.toLowerCase() === 'pdf');
-      // if (existingFormat) {
-      //   if (existingFormat.uri !== pdfName) {
-      //     utils.showError(`Invalid name for PDF format. Expected "${pdfName}", but got "${existingFormat.uri}".
-      //       Consider removing the PDF format from 'config.alternateFormats', as it is automatically generated already.`);
-      //   }
-      //   return;
-      // }
-      // config.alternateFormats.push({
-      //   label: 'PDF',
-      //   uri: pdfName,
-      // });
-    }
+    // (config, document, utils) => {
+    //   if (!config.alternateFormats) {
+    //     config.alternateFormats = [];
+    //   }
+    //   const pdfName = `${config.pubDomain}-${config.shortName}-${config.publishVersion}.pdf`;
+    //   const existingFormat = config.alternateFormats.find(format => format.label.toLowerCase() === 'pdf');
+    //   if (existingFormat) {
+    //     if (existingFormat.uri !== pdfName) {
+    //       utils.showError(`Invalid name for PDF format. Expected "${pdfName}", but got "${existingFormat.uri}".
+    //         Consider removing the PDF format from 'config.alternateFormats', as it is automatically generated already.`);
+    //     }
+    //     return;
+    //   }
+    //   config.alternateFormats.push({
+    //     label: 'PDF',
+    //     uri: pdfName,
+    //   });
+    // }
   ];
 
   respecConfig.postProcess = [
