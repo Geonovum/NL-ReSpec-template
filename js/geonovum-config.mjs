@@ -1238,26 +1238,26 @@ export function loadRespecWithConfiguration(localConfig) {
       if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(config.shortName)) {
         utils.showError(`Invalid shortName. Must be in kebab-case (only lowercase letters and potentially separated by dashes), but was "${config.shortName}"`);
       }
-      if (missingOrIsEmpty(config.github)) {
-        utils.showError('No github link specified in configuration.');
-      }
+      // if (missingOrIsEmpty(config.github)) {
+      //   utils.showError('No github link specified in configuration.');
+      // }
       if (missingOrIsEmpty(config.editors)) {
         utils.showError('No editors specified in configuration.');
       }
       if (missingOrIsEmpty(config.authors)) {
         utils.showError('No authors specified in configuration.');
       }
-      for (const person of [...(config.editors || []), ...(config.authors || [])]) {
-        if (!('companyURL' in person)) {
-          continue;
-        }
-        // if (person.companyURL.includes("logius.nl") && person.companyURL !== "https://www.logius.nl") {
-        //   utils.showError(`companyURL of an editor/author of Logius must be "https://www.logius.nl", instead it was "${person.companyURL}"`);
-        // }
-        if (person.companyURL.includes("github.com")) {
-          utils.showError(`companyURL of an editor/author must link to a website of an organisation (not GitHub), instead it was ${person.companyURL}`);
-        }
-      }
+      // for (const person of [...(config.editors || []), ...(config.authors || [])]) {
+      //   if (!('companyURL' in person)) {
+      //     continue;
+      //   }
+      //   if (person.companyURL.includes("logius.nl") && person.companyURL !== "https://www.logius.nl") {
+      //     utils.showError(`companyURL of an editor/author of Logius must be "https://www.logius.nl", instead it was "${person.companyURL}"`);
+      //   }
+      //   if (person.companyURL.includes("github.com")) {
+      //     utils.showError(`companyURL of an editor/author must link to a website of an organisation (not GitHub), instead it was ${person.companyURL}`);
+      //   }
+      // }
     },
     // (config, document, utils) => {
     //   if (config.specStatus.toLowerCase() !== 'cv') {
@@ -1306,19 +1306,19 @@ export function loadRespecWithConfiguration(localConfig) {
       if (!config.alternateFormats) {
         config.alternateFormats = [];
       }
-      const pdfName = `${config.pubDomain}-${config.shortName}-${config.publishVersion}.pdf`;
-      const existingFormat = config.alternateFormats.find(format => format.label.toLowerCase() === 'pdf');
-      if (existingFormat) {
-        if (existingFormat.uri !== pdfName) {
-          utils.showError(`Invalid name for PDF format. Expected "${pdfName}", but got "${existingFormat.uri}".
-            Consider removing the PDF format from 'config.alternateFormats', as it is automatically generated already.`);
-        }
-        return;
-      }
-      config.alternateFormats.push({
-        label: 'PDF',
-        uri: pdfName,
-      });
+      // const pdfName = `${config.pubDomain}-${config.shortName}-${config.publishVersion}.pdf`;
+      // const existingFormat = config.alternateFormats.find(format => format.label.toLowerCase() === 'pdf');
+      // if (existingFormat) {
+      //   if (existingFormat.uri !== pdfName) {
+      //     utils.showError(`Invalid name for PDF format. Expected "${pdfName}", but got "${existingFormat.uri}".
+      //       Consider removing the PDF format from 'config.alternateFormats', as it is automatically generated already.`);
+      //   }
+      //   return;
+      // }
+      // config.alternateFormats.push({
+      //   label: 'PDF',
+      //   uri: pdfName,
+      // });
     }
   ];
 
