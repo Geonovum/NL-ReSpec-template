@@ -4,13 +4,22 @@
 <head>
   <meta content="text/html; charset=utf-8" http-equiv="content-type">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!--meta name="color-scheme" content="light dark"--><!-- ??? -->
+  <!--meta name="color-scheme" content="light dark"--><!-- in logius template -->
   <script src="https://cdn.jsdelivr.net/gh/digitalbazaar/respec-mermaid@1.0.1/dist/main.js" class="remove"></script>
 
   <title>Geonovum template voor ReSpec</title>
 
+  <!-- TODO: Vul in config.mjs de titel in -->
+  <script>document.title = respecConfig.title</script>
+
+  <!-- Hier wordt het favicon gezet -->
   <link rel="shortcut icon" type="image/x-icon" href="https://docs.geostandaarden.nl/media/Geonovum.ico" />
+  
   <script class="remove" type="module" src="js/config.mjs"></script>
+
+  <!-- De volgende regel zorgt ervoor dat plaatjes uit Imvertor niet geschaald
+       worden, zodat de imagemap die op deze plaatjes zit werkt. -->
+  <style>div.imageinfo img {max-width: none;}</style>
 </head>
 
 <body>
