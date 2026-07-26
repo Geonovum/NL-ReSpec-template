@@ -193,7 +193,7 @@ var organisationConfig = {
     },
     CIS10: {
       title:
-        "ISO 19123-2:2018 Geographic information â€” Schema for coverage geometry and functions â€” Part 2: Coverage implementation schema",
+        "ISO 19123-2:2018 Geographic information — Schema for coverage geometry and functions — Part 2: Coverage implementation schema",
       href: "https://www.iso.org/standard/70948.html",
       status: "Published",
       publisher: "ISD",
@@ -206,10 +206,10 @@ var organisationConfig = {
       status: "Published",
       publisher: "Open Geospatial Consortium",
       editors: [
-        "Gerhard GrÃ¶ger",
+        "Gerhard Gröger",
         "Thomas H. Kolbe",
         "Claus Nagel",
-        "Karl-Heinz HÃ¤fele",
+        "Karl-Heinz Häfele",
       ],
       date: "2012-04-04",
       id: "CityGML2",
@@ -343,7 +343,7 @@ var organisationConfig = {
     },
     GML31: {
       title:
-        "OpenGISÂ® Geography Markup Language (GML) Implementation Specification, v3.1.1",
+        "OpenGIS® Geography Markup Language (GML) Implementation Specification, v3.1.1",
       href: "https://portal.ogc.org/files/?artifact_id=4700",
       status: "Published",
       publisher: "Open Geospatial Consortium",
@@ -359,7 +359,7 @@ var organisationConfig = {
     },
     GML33: {
       title:
-        "OGCÂ® Geography Markup Language (GML) â€” Extended schemas and encoding rules, v3.3",
+        "OGC® Geography Markup Language (GML) — Extended schemas and encoding rules, v3.3",
       href: "https://portal.ogc.org/files/?artifact_id=46568",
       status: "Published",
       publisher: "Open Geospatial Consortium",
@@ -369,13 +369,13 @@ var organisationConfig = {
     },
     GMLJPEG2000: {
       title:
-        "OGCÂ® GML in JPEG 2000 (GMLJP2) Encoding Standard Part 1: Core v.2.1",
+        "OGC® GML in JPEG 2000 (GMLJP2) Encoding Standard Part 1: Core v.2.1",
       href: "http://docs.opengeospatial.org/is/08-085r8/08-085r8.html",
       status: "Published",
       publisher: "Open Geospatial Consortium",
       editors: [
         "Lucio Colaiacomo",
-        "Joan MasÃ³",
+        "Joan Masó",
         "Emmanuel Devys",
         "Eric Hirschorn",
       ],
@@ -397,7 +397,7 @@ var organisationConfig = {
       id: "GMLSF",
     },
     HDF5: {
-      title: "OGC Hierarchical Data Format Version 5 (HDF5Â®) Core Standard",
+      title: "OGC Hierarchical Data Format Version 5 (HDF5®) Core Standard",
       href: "http://docs.opengeospatial.org/is/18-043r3/18-043r3.html",
       status: "Published",
       publisher: "Open Geospatial Consortium",
@@ -416,7 +416,7 @@ var organisationConfig = {
     },
     HRCRS: {
       title:
-        "Handreiking Gebruik coÃ¶rdinaatreferentiesystemen bij uitwisseling en visualisatie van geo-informatie",
+        "Handreiking Gebruik coördinaatreferentiesystemen bij uitwisseling en visualisatie van geo-informatie",
       href: "https://docs.geostandaarden.nl/crs/crs/",
       status: "Definitief",
       publisher: "Geonovum",
@@ -635,7 +635,7 @@ var organisationConfig = {
     },
     ISO19101: {
       title:
-        "ISO 19101-1:2014 Geographic information â€” Reference model â€” Part 1: Fundamentals",
+        "ISO 19101-1:2014 Geographic information — Reference model — Part 1: Fundamentals",
       href: "https://www.iso.org/standard/59164.html",
       status: "Published",
       publisher: "ISO",
@@ -644,7 +644,7 @@ var organisationConfig = {
     },
     ISO19103: {
       title:
-        "ISO 19103:2015 Geographic information â€” Conceptual schema language",
+        "ISO 19103:2015 Geographic information — Conceptual schema language",
       href: "https://www.iso.org/standard/56734.html",
       status: "Published",
       publisher: "ISO",
@@ -652,7 +652,7 @@ var organisationConfig = {
       id: "ISO19103",
     },
     ISO19107: {
-      title: "ISO 19107:2019 Geographic information â€” Spatial schema",
+      title: "ISO 19107:2019 Geographic information — Spatial schema",
       href: "https://www.iso.org/standard/66175.html",
       status: "Published",
       publisher: "ISO",
@@ -660,7 +660,7 @@ var organisationConfig = {
       id: "ISO19107",
     },
     ISO19108: {
-      title: "ISO 19108:2002 Geographic information â€” Temporal schema",
+      title: "ISO 19108:2002 Geographic information — Temporal schema",
       href: "https://www.iso.org/standard/26013.html",
       status: "Published",
       publisher: "ISO",
@@ -669,7 +669,7 @@ var organisationConfig = {
     },
     ISO19109: {
       title:
-        "ISO 19109:2015 Geographic information â€” Rules for application schema",
+        "ISO 19109:2015 Geographic information — Rules for application schema",
       href: "https://www.iso.org/standard/59193.html",
       status: "Published",
       publisher: "ISO",
@@ -678,7 +678,7 @@ var organisationConfig = {
     },
     ISO19110: {
       title:
-        "ISO 19110:2016 Geographic information â€” Methodology for feature cataloguing",
+        "ISO 19110:2016 Geographic information — Methodology for feature cataloguing",
       href: "https://www.iso.org/standard/57303.html",
       status: "Published",
       publisher: "ISO",
@@ -687,7 +687,7 @@ var organisationConfig = {
     },
     ISO19111: {
       title:
-        "ISO 19111:2019 Geographic information â€” Referencing by coordinates",
+        "ISO 19111:2019 Geographic information — Referencing by coordinates",
       href: "https://www.iso.org/standard/74039.html",
       status: "Published",
       publisher: "ISO",
@@ -704,7 +704,7 @@ var organisationConfig = {
     },
     "ISO19115-2006": {
       title:
-        "ISO 19115:2003/Cor 1:2006 Geographic information â€” Metadata â€” Technical Corrigendum 1",
+        "ISO 19115:2003/Cor 1:2006 Geographic information — Metadata — Technical Corrigendum 1",
       href: "https://www.iso.org/standard/26020.html",
       status: ["Adopted specification"],
       publisher: "International Organization for Standardization",
@@ -713,7 +713,7 @@ var organisationConfig = {
     },
     "ISO19115-2009": {
       title:
-        "ISO 19115-2:2009 Geographic information â€” Metadata â€” Part 2: Extensions for imagery and gridded data",
+        "ISO 19115-2:2009 Geographic information — Metadata — Part 2: Extensions for imagery and gridded data",
       href: "https://www.iso.org/standard/39229.html",
       publisher: "International Organization for Standardization",
       date: "2009-02-01",
@@ -721,7 +721,7 @@ var organisationConfig = {
     },
     "ISO19115-2014": {
       title:
-        "ISO 19115-1:2014 Geographic information â€” Metadata â€” Part 1: Fundamentals",
+        "ISO 19115-1:2014 Geographic information — Metadata — Part 1: Fundamentals",
       href: "https://www.iso.org/standard/53798.html",
       publisher: "International Organization for Standardization",
       date: "2014-04-01",
@@ -736,7 +736,7 @@ var organisationConfig = {
       id: "ISO19117",
     },
     ISO19118: {
-      title: "ISO 19118:2011 Geographic information â€” Encoding",
+      title: "ISO 19118:2011 Geographic information — Encoding",
       href: "https://www.iso.org/standard/44212.html",
       status: "Published",
       publisher: "ISO",
@@ -751,7 +751,7 @@ var organisationConfig = {
       id: "ISO19119",
     },
     "ISO19119-2005": {
-      title: "ISO 19119:2005 Geographic information â€” Services",
+      title: "ISO 19119:2005 Geographic information — Services",
       href: "https://www.iso.org/standard/39890.html",
       publisher: "International Organization for Standardization",
       date: "2005-02-01",
@@ -759,7 +759,7 @@ var organisationConfig = {
     },
     "ISO19119-2008": {
       title:
-        "ISO 19119:2005/Amd 1:2008 Geographic information â€” Services â€” Amendment 1: Extensions of the service metadata model",
+        "ISO 19119:2005/Amd 1:2008 Geographic information — Services — Amendment 1: Extensions of the service metadata model",
       href: "https://www.iso.org/standard/44268.html",
       publisher: "International Organization for Standardization",
       date: "2008-05-01",
@@ -776,7 +776,7 @@ var organisationConfig = {
     },
     ISO19131: {
       title:
-        "ISO 19131:2022 Geographic information â€” Data product specifications",
+        "ISO 19131:2022 Geographic information — Data product specifications",
       href: "https://www.iso.org/standard/85092.html",
       status: "Published",
       publisher: "ISO",
@@ -785,7 +785,7 @@ var organisationConfig = {
     },
     ISO19136: {
       title:
-        "ISO 19136-1:2020 Geographic information â€” Geography Markup Language (GML) â€” Part 1: Fundamentals",
+        "ISO 19136-1:2020 Geographic information — Geography Markup Language (GML) — Part 1: Fundamentals",
       href: "https://www.iso.org/standard/75676.html",
       status: "Published",
       publisher: "ISO",
@@ -812,7 +812,7 @@ var organisationConfig = {
     },
     ISOJPEG2000: {
       title:
-        "ISO/IEC 15444-1:2019 Information technology â€” JPEG 2000 image coding system â€” Part 1: Core coding system",
+        "ISO/IEC 15444-1:2019 Information technology — JPEG 2000 image coding system — Part 1: Core coding system",
       href: "https://www.iso.org/standard/78321.html",
       status: "Published",
       publisher: "ISO",
@@ -935,7 +935,7 @@ var organisationConfig = {
     },
     NLWFS: {
       title:
-        "Nederlands profiel op ISO 19142 Geographic information â€” Web Feature Service, Versie 1.1",
+        "Nederlands profiel op ISO 19142 Geographic information — Web Feature Service, Versie 1.1",
       href: "https://www.geonovum.nl/geo-standaarden/services/nederlands-wfs-profiel-11-op-iso-19142-voor-web-feature-services-20",
       status: "Definitief",
       publisher: "Geonovum",
@@ -944,7 +944,7 @@ var organisationConfig = {
     },
     NLWMS: {
       title:
-        "Nederlands profiel op ISO 19128 Geographic information â€” Web Map Server Interface",
+        "Nederlands profiel op ISO 19128 Geographic information — Web Map Server Interface",
       href: "https://www.geonovum.nl/uploads/documents/nederlands_profiel_op_iso_19128_wms_1.3_-_versie_1.0.pdf",
       status: "Vastgesteld",
       publisher: "Geonovum",
@@ -1084,7 +1084,7 @@ var organisationConfig = {
     OREFCO: {
       title: "OGC Abstract Specification Topic 2: Referencing by coordinates",
       href: "http://docs.opengeospatial.org/as/18-005r4/18-005r4.html",
-      status: "OGCÂ® Publicly Available Standard",
+      status: "OGC® Publicly Available Standard",
       publisher: "Open Geospatial Consortium (OGC)",
       editors: ["Roger Lott"],
       date: "2019-02-08",
