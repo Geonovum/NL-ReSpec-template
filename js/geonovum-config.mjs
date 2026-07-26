@@ -1228,99 +1228,99 @@ export function loadRespecWithConfiguration(localConfig) {
     ...localConfig.localBiblio,
   };
 
-  respecConfig.preProcess = [
-    ...(localConfig.preProcess || []),
-    (config, document, utils) => {
-      // const ACCEPTED_DOMAINS = ['api', 'bomos', 'dk', 'digimelding', 'fsc', 'ftv', 'logboek', 'notificatieservices', 'st'];
-      // if (!ACCEPTED_DOMAINS.includes(config.pubDomain)) {
-      //   utils.showError(`Invalid pubDomain. Must be one of ${ACCEPTED_DOMAINS}, but was "${config.pubDomain}"`);
-      // }
-      if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(config.shortName)) {
-        utils.showError(`Invalid shortName. Must be in kebab-case (only lowercase letters and potentially separated by dashes), but was "${config.shortName}"`);
-      }
-      // if (missingOrIsEmpty(config.github)) {
-      //   utils.showError('No github link specified in configuration.');
-      // }
-      if (missingOrIsEmpty(config.editors)) {
-        utils.showError('No editors specified in configuration.');
-      }
-      if (missingOrIsEmpty(config.authors)) {
-        utils.showError('No authors specified in configuration.');
-      }
-      // for (const person of [...(config.editors || []), ...(config.authors || [])]) {
-      //   if (!('companyURL' in person)) {
-      //     continue;
-      //   }
-      //   if (person.companyURL.includes("logius.nl") && person.companyURL !== "https://www.logius.nl") {
-      //     utils.showError(`companyURL of an editor/author of Logius must be "https://www.logius.nl", instead it was "${person.companyURL}"`);
-      //   }
-      //   if (person.companyURL.includes("github.com")) {
-      //     utils.showError(`companyURL of an editor/author must link to a website of an organisation (not GitHub), instead it was ${person.companyURL}`);
-      //   }
-      // }
-    } //,
-    // (config, document, utils) => {
-    //   if (config.specStatus.toLowerCase() !== 'cv') {
-    //     return;
-    //   }
-    //   let email;
-    //   let overleg;
+  // respecConfig.preProcess = [
+  //   ...(localConfig.preProcess || []),
+  //   (config, document, utils) => {
+  //     // const ACCEPTED_DOMAINS = ['api', 'bomos', 'dk', 'digimelding', 'fsc', 'ftv', 'logboek', 'notificatieservices', 'st'];
+  //     // if (!ACCEPTED_DOMAINS.includes(config.pubDomain)) {
+  //     //   utils.showError(`Invalid pubDomain. Must be one of ${ACCEPTED_DOMAINS}, but was "${config.pubDomain}"`);
+  //     // }
+  //     if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(config.shortName)) {
+  //       utils.showError(`Invalid shortName. Must be in kebab-case (only lowercase letters and potentially separated by dashes), but was "${config.shortName}"`);
+  //     }
+  //     // if (missingOrIsEmpty(config.github)) {
+  //     //   utils.showError('No github link specified in configuration.');
+  //     // }
+  //     if (missingOrIsEmpty(config.editors)) {
+  //       utils.showError('No editors specified in configuration.');
+  //     }
+  //     if (missingOrIsEmpty(config.authors)) {
+  //       utils.showError('No authors specified in configuration.');
+  //     }
+  //     // for (const person of [...(config.editors || []), ...(config.authors || [])]) {
+  //     //   if (!('companyURL' in person)) {
+  //     //     continue;
+  //     //   }
+  //     //   if (person.companyURL.includes("logius.nl") && person.companyURL !== "https://www.logius.nl") {
+  //     //     utils.showError(`companyURL of an editor/author of Logius must be "https://www.logius.nl", instead it was "${person.companyURL}"`);
+  //     //   }
+  //     //   if (person.companyURL.includes("github.com")) {
+  //     //     utils.showError(`companyURL of an editor/author must link to a website of an organisation (not GitHub), instead it was ${person.companyURL}`);
+  //     //   }
+  //     // }
+  //   } //,
+  //   // (config, document, utils) => {
+  //   //   if (config.specStatus.toLowerCase() !== 'cv') {
+  //   //     return;
+  //   //   }
+  //   //   let email;
+  //   //   let overleg;
 
-    //   if (['dk', 'fsc'].includes(config.pubDomain)) {
-    //     email = "digikoppeling@logius.nl";
-    //     overleg = "Digikoppeling";
-    //   } else if (config.pubDomain === "bomos") {
-    //     email = "bomos@logius.nl";
-    //     overleg = "BOMOS-klankbord";
-    //   } else {
-    //     email = "api@logius.nl";
+  //   //   if (['dk', 'fsc'].includes(config.pubDomain)) {
+  //   //     email = "digikoppeling@logius.nl";
+  //   //     overleg = "Digikoppeling";
+  //   //   } else if (config.pubDomain === "bomos") {
+  //   //     email = "bomos@logius.nl";
+  //   //     overleg = "BOMOS-klankbord";
+  //   //   } else {
+  //   //     email = "api@logius.nl";
 
-    //     if (config.pubDomain === "notificatieservices") {
-    //       overleg = "Notificeren";
-    //     } else if (config.pubDomain === "logboek") {
-    //       overleg = "LDV";
-    //     } else if (config.shortName.startsWith("oauth") || config.shortName === "oidc") {
-    //       overleg = "OAuth";
-    //     } else {
-    //       overleg = "API";
-    //     }
-    //   }
+  //   //     if (config.pubDomain === "notificatieservices") {
+  //   //       overleg = "Notificeren";
+  //   //     } else if (config.pubDomain === "logboek") {
+  //   //       overleg = "LDV";
+  //   //     } else if (config.shortName.startsWith("oauth") || config.shortName === "oidc") {
+  //   //       overleg = "OAuth";
+  //   //     } else {
+  //   //       overleg = "API";
+  //   //     }
+  //   //   }
 
-    //   for (const texts of Object.values(config.sotdText)) {
-    //     texts.cv = texts.cv.replace(/\w+@logius\.nl/, email);
-    //   }
-    //   // Zodat het kan worden uitgelezen bij het aanmaken van de consultatie README
-    //   utils.amendConfiguration({
-    //     emailForConsultation: email,
-    //     technischOverleg: overleg,
-    //   });
-    // },
-    // (config, document) => {
-    //   // Secties worden toegevoegd in omgekeerde volgorde. Dus de
-    //   // sectie die hier als laatste staat, komt als eerste voor
-    //   // in het document.
-    //   prependSectionToBodyAndCreateIfNotExists(document, 'conformance');
-    //   prependSectionToBodyAndCreateIfNotExists(document, 'sotd');
-    // },
-    // (config, document, utils) => {
-    //   if (!config.alternateFormats) {
-    //     config.alternateFormats = [];
-    //   }
-    //   const pdfName = `${config.pubDomain}-${config.shortName}-${config.publishVersion}.pdf`;
-    //   const existingFormat = config.alternateFormats.find(format => format.label.toLowerCase() === 'pdf');
-    //   if (existingFormat) {
-    //     if (existingFormat.uri !== pdfName) {
-    //       utils.showError(`Invalid name for PDF format. Expected "${pdfName}", but got "${existingFormat.uri}".
-    //         Consider removing the PDF format from 'config.alternateFormats', as it is automatically generated already.`);
-    //     }
-    //     return;
-    //   }
-    //   config.alternateFormats.push({
-    //     label: 'PDF',
-    //     uri: pdfName,
-    //   });
-    // }
-  ];
+  //   //   for (const texts of Object.values(config.sotdText)) {
+  //   //     texts.cv = texts.cv.replace(/\w+@logius\.nl/, email);
+  //   //   }
+  //   //   // Zodat het kan worden uitgelezen bij het aanmaken van de consultatie README
+  //   //   utils.amendConfiguration({
+  //   //     emailForConsultation: email,
+  //   //     technischOverleg: overleg,
+  //   //   });
+  //   // },
+  //   // (config, document) => {
+  //   //   // Secties worden toegevoegd in omgekeerde volgorde. Dus de
+  //   //   // sectie die hier als laatste staat, komt als eerste voor
+  //   //   // in het document.
+  //   //   prependSectionToBodyAndCreateIfNotExists(document, 'conformance');
+  //   //   prependSectionToBodyAndCreateIfNotExists(document, 'sotd');
+  //   // },
+  //   // (config, document, utils) => {
+  //   //   if (!config.alternateFormats) {
+  //   //     config.alternateFormats = [];
+  //   //   }
+  //   //   const pdfName = `${config.pubDomain}-${config.shortName}-${config.publishVersion}.pdf`;
+  //   //   const existingFormat = config.alternateFormats.find(format => format.label.toLowerCase() === 'pdf');
+  //   //   if (existingFormat) {
+  //   //     if (existingFormat.uri !== pdfName) {
+  //   //       utils.showError(`Invalid name for PDF format. Expected "${pdfName}", but got "${existingFormat.uri}".
+  //   //         Consider removing the PDF format from 'config.alternateFormats', as it is automatically generated already.`);
+  //   //     }
+  //   //     return;
+  //   //   }
+  //   //   config.alternateFormats.push({
+  //   //     label: 'PDF',
+  //   //     uri: pdfName,
+  //   //   });
+  //   // }
+  // ];
 
   respecConfig.postProcess = [
     ...(localConfig.postProcess || []),
