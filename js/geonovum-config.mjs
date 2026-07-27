@@ -1324,29 +1324,47 @@ export function loadRespecWithConfiguration(localConfig) {
 
   respecConfig.postProcess = [
     ...(respecConfig.postProcess || []),
+    // to fix mermaid 1.3.0 zero width
     (config, document) => {
-      if (!config.spellcheck) {
-        return;
+      const mermaidImages = document.querySelectorAll('figure pre img');
+      for (const img of mermaidImages) {
+        // Handle image load success  
+        img.onload = (e) => { 
+          const imgEl = e.target; 
+          //if (imgEl.naturalWidth < imgEl.naturalHeight) {
+            imgEl.width = imgEl.naturalWidth;
+            imgEl.height = imgEl.naturalHeight;            
+          //} else {
+          //  imgEl.width = imgEl.naturalWidth/2;
+          //  imgEl.height = imgEl.naturalHeight/2;             
+          //}
+        };  
       }
-      const removableElements = [
-        // Contains author and editor names that don't match any dictionary
-        document.querySelector('.head'),
-        // Contain name of standards and their authors, which don't match
-        // any dictionary
-        document.getElementById('references'),
-        ...document.getElementsByClassName('bibref'),
-        ...document.querySelectorAll('[data-cite]'),
-        // Any particular part of a standard that is custom and doesn't need
-        // checking, such as Dutch context in an English standard
-        ...document.getElementsByClassName('remove-for-spellcheck'),
-      ];
-      for (const element of removableElements) {
-        element?.remove();
-      }
+    // },
+    // (config, document) => {
+    //   if (!config.spellcheck) {
+    //     return;
+    //   }
+    //   const removableElements = [
+    //     // Contains author and editor names that don't match any dictionary
+    //     document.querySelector('.head'),
+    //     // Contain name of standards and their authors, which don't match
+    //     // any dictionary
+    //     document.getElementById('references'),
+    //     ...document.getElementsByClassName('bibref'),
+    //     ...document.querySelectorAll('[data-cite]'),
+    //     // Any particular part of a standard that is custom and doesn't need
+    //     // checking, such as Dutch context in an English standard
+    //     ...document.getElementsByClassName('remove-for-spellcheck'),
+    //   ];
+    //   for (const element of removableElements) {
+    //     element?.remove();
+    //   }
     }
   ];
 
    document.title = respecConfig.title;
+
    globalThis.respecConfig = respecConfig;
 
   //import("https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js");
