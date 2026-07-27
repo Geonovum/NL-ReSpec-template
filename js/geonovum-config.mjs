@@ -1323,7 +1323,7 @@ export function loadRespecWithConfiguration(localConfig) {
   // ];
 
   respecConfig.postProcess = [
-    ...(localConfig.postProcess || []),
+    ...(respecConfig.postProcess || []),
     (config, document) => {
       if (!config.spellcheck) {
         return;
@@ -1346,8 +1346,10 @@ export function loadRespecWithConfiguration(localConfig) {
     }
   ];
 
-  globalThis.respecConfig = respecConfig;
+   document.title = respecConfig.title;
+   globalThis.respecConfig = respecConfig;
 
   //import("https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js");
   import("https://logius-standaarden.github.io/publicatie/respec/builds/respec-nlgov.js");
+
 }
