@@ -1331,14 +1331,16 @@ export function loadRespecWithConfiguration(localConfig) {
         // Handle image load success  
         img.onload = (e) => { 
           const imgEl = e.target; 
+          if (imgEl.width == 0) { 
           //if (imgEl.naturalWidth < imgEl.naturalHeight) {
-            imgEl.width = imgEl.naturalWidth;
-            imgEl.height = imgEl.naturalHeight;            
+          //   imgEl.width = imgEl.naturalWidth;
+          //   imgEl.height = imgEl.naturalHeight;            
           //} else {
-          //  imgEl.width = imgEl.naturalWidth/2;
-          //  imgEl.height = imgEl.naturalHeight/2;             
+            imgEl.width = imgEl.naturalWidth/2;
+            imgEl.height = imgEl.naturalHeight/2;             
           //}
-        };  
+          }
+        };
       }
     // },
     // (config, document) => {
