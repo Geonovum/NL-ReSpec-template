@@ -76,7 +76,8 @@ let respecConfig = {
     ],
 
   // TODO: Vul de github URL in.
-  //neem hier de URL van de github repository op waar het respec document in staat
+  // neem hier de URL van de github repository op waar het respec document in staat
+  // dit zorgt voor het 'Doe mee:' onderdeel in het voorblad van de publicatie.
   github: "https://github.com/Geonovum/NL-ReSpec-template",
 
   // Create PDF and link to file in header (optional):
