@@ -81,6 +81,7 @@ let respecConfig = {
   github: "https://github.com/Geonovum/NL-ReSpec-template",
 
   postProcess: [
+    ...(organisationConfig.postProcess ?? []),
     localizeGitHubHeaderLinks
   ],
 

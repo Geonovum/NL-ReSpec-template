@@ -9,6 +9,7 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 BUILD_WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "build.yml"
+RESPEC_CONFIG = REPOSITORY_ROOT / "js" / "config.js"
 
 
 def build_steps() -> list[dict]:
@@ -21,6 +22,15 @@ def find_step(name: str) -> dict | None:
 
 
 class PublicationPreflightTest(unittest.TestCase):
+    def test_local_post_processors_preserve_organisation_processors(self) -> None:
+        config = RESPEC_CONFIG.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "...(organisationConfig.postProcess ?? [])",
+            config,
+            "Lokale post-processors mogen de Mermaid-processor uit de organisatieconfig niet vervangen.",
+        )
+
     def test_snapshot_uses_pinned_respec_on_supported_node(self) -> None:
         setup = find_step("Set up Node.js")
         generate = find_step("Generate HTML snapshot")
