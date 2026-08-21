@@ -87,6 +87,15 @@ De resultaten zijn zichtbaar in het tabblad **Actions** van je repository.
 
 Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 
+### Controle vóór publiceren
+
+Controleer vóór het maken van een pre-release of release in **Actions** de
+`Main Workflow` van de commit die je wilt publiceren. De job
+`Snapshot + Checks` moet groen zijn en de samenvatting moet
+**“Publicatiegereed: ja”** tonen. Proof HTML en de Lychee-linkcontrole zijn
+blokkerend; bij **“Publicatiegereed: nee”** moet je de gemelde fouten eerst
+oplossen.
+
 ### Pre-release (testomgeving)
 
 * Ga naar het tabblad **Releases** in je eigen repo
