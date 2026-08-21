@@ -1,1 +1,14 @@
-Geen linkfouten gevonden.
+# Summary
+
+| Status         | Count |
+|----------------|-------|
+| 🔍 Total       | 45    |
+| ✅ Successful  | 25    |
+| ⏳ Timeouts    | 0     |
+| 🔀 Redirected  | 0     |
+| 👻 Excluded    | 20    |
+| ❓ Unknown     | 0     |
+| 🚫 Errors      | 0     |
+| ⛔ Unsupported | 0     |
+
+[Full Github Actions output](https://github.com/Geonovum/NL-ReSpec-template/actions/runs/32467094787?check_suite_focus=true)
