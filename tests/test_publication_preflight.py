@@ -21,6 +21,16 @@ def find_step(name: str) -> dict | None:
 
 
 class PublicationPreflightTest(unittest.TestCase):
+    def test_snapshot_uses_pinned_respec_on_supported_node(self) -> None:
+        setup = find_step("Set up Node.js")
+        generate = find_step("Generate HTML snapshot")
+
+        self.assertIsNotNone(setup, "De build moet expliciet een ondersteunde Node-versie installeren.")
+        self.assertTrue(setup["uses"].startswith("actions/setup-node@"))
+        self.assertEqual(str(setup["with"]["node-version"]), "24")
+        self.assertIsNotNone(generate)
+        self.assertIn("npx --yes respec@37.3.2", generate["run"])
+
     def test_prepares_the_same_content_tree_that_publish_uses(self) -> None:
         step = find_step("Prepare publication for validation")
         self.assertIsNotNone(step, "De build moet het toekomstige publicatiepakket voorbereiden.")
