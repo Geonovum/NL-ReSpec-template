@@ -116,26 +116,6 @@ jobs:
           enforce_https: false
           ignore_empty_alt: true
 
-      - name: Diagnose invalid HTML context
-        if: ${{ failure() && steps.publication-html.outcome == 'failure' }}
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import re
-          from pathlib import Path
-
-          html = Path(".checks/publication/index.html").read_text(encoding="utf-8")
-          for opening in re.finditer(r"<code\b[^>]*>", html, re.IGNORECASE):
-              closing = html.find("</code>", opening.end())
-              div = html.find("<div", opening.end())
-              if closing != -1 and div != -1 and div < closing:
-                  line = html.count("\n", 0, div) + 1
-                  column = div - html.rfind("\n", 0, div)
-                  context = html[max(opening.start(), div - 160):div + 320]
-                  print(f"div-in-code op {line}:{column}")
-                  print(context)
-          PY
-
       - name: Check for alternateFormats via Node
         id: config
         run: |
