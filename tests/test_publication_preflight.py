@@ -53,12 +53,12 @@ class PublicationPreflightTest(unittest.TestCase):
                 target.mkdir()
                 (target / "asset.txt").write_text(asset_directory, encoding="utf-8")
 
-            stale = source / ".checks" / "publication"
+            stale = source / "publication-validation"
             stale.mkdir(parents=True)
             (stale / "stale.html").write_text("stale", encoding="utf-8")
 
             environment = os.environ.copy()
-            environment["CHECK_DIR"] = ".checks"
+            environment["GITHUB_WORKSPACE"] = str(source)
             subprocess.run(
                 ["bash", "-euo", "pipefail", "-c", step["run"]],
                 cwd=source,
@@ -68,10 +68,11 @@ class PublicationPreflightTest(unittest.TestCase):
                 text=True,
             )
 
-            publication = source / ".checks" / "publication"
+            publication = source / "publication-validation"
             self.assertEqual((publication / "index.html").read_text(encoding="utf-8"), "snapshot")
             self.assertFalse((publication / "snapshot.html").exists())
             self.assertFalse((publication / "stale.html").exists())
+            self.assertFalse((source / ".checks").exists())
             for asset_directory in ("data", "media", "js", "css"):
                 self.assertEqual(
                     (publication / asset_directory / "asset.txt").read_text(encoding="utf-8"),
@@ -84,7 +85,10 @@ class PublicationPreflightTest(unittest.TestCase):
 
         self.assertNotIn("continue-on-error", step)
         self.assertNotIn("if", step)
-        self.assertEqual(step["with"]["directory"], "${{ env.CHECK_DIR }}/publication")
+        self.assertEqual(
+            step["with"]["directory"],
+            "publication-validation",
+        )
         self.assertIs(step["with"]["check_html"], True)
         self.assertIs(step["with"]["check_css"], False)
         self.assertIs(step["with"]["disable_external"], True)
@@ -98,10 +102,35 @@ class PublicationPreflightTest(unittest.TestCase):
         self.assertEqual(step.get("if"), "${{ !cancelled() }}")
         self.assertTrue(step["uses"].startswith("lycheeverse/lychee-action@"))
         self.assertIs(step["with"]["fail"], True)
-        self.assertEqual(step["with"]["workingDirectory"], "${{ env.CHECK_DIR }}/publication")
+        self.assertEqual(
+            step["with"]["workingDirectory"],
+            "${{ github.workspace }}/publication-validation",
+        )
         self.assertIn("--offline", step["with"]["args"])
         self.assertIn("--root-dir", step["with"]["args"])
         self.assertIn("./**/*.html", step["with"]["args"])
+
+    def test_validation_reports_are_artifacts_and_not_committed(self) -> None:
+        commit_step = find_step("Commit all results")
+        artifact_step = find_step("Upload validation reports")
+
+        self.assertIsNotNone(commit_step)
+        self.assertNotIn(".checks", commit_step["run"])
+        self.assertNotIn("CHECK_DIR", commit_step["run"])
+        self.assertIsNotNone(artifact_step)
+        self.assertEqual(artifact_step.get("if"), "${{ always() }}")
+        self.assertIn(
+            "${{ runner.temp }}/nl-respec-validation/wcag-report.json",
+            artifact_step["with"]["path"],
+        )
+        self.assertIn(
+            "${{ runner.temp }}/nl-respec-validation/link-check.txt",
+            artifact_step["with"]["path"],
+        )
+
+        cleanup_step = find_step("Remove validation working directory")
+        self.assertIsNotNone(cleanup_step)
+        self.assertEqual(cleanup_step.get("if"), "${{ always() }}")
 
     def test_summary_always_reports_whether_the_commit_is_ready_for_publication(self) -> None:
         html_step = find_step("Validate publication HTML")

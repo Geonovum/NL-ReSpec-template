@@ -1,8 +1,6 @@
 name: Build / check
 on:
   workflow_call:
-env:
-  CHECK_DIR: ".checks"
 jobs:
   build:
     name: Snapshot + Checks
@@ -29,18 +27,18 @@ jobs:
           TARGET_BRANCH="${TARGET_BRANCH#refs/heads/}"
 
           if [[ -z "$TARGET_BRANCH" ]]; then
-            echo "::error title=Doelbranch ontbreekt::Kan geen branch bepalen om snapshot en checkresultaten naar terug te schrijven."
+            echo "::error title=Doelbranch ontbreekt::Kan geen branch bepalen om de gegenereerde documenten naar terug te schrijven."
             exit 1
           fi
 
           if ! git fetch --no-tags origin "refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"; then
-            echo "::error title=Doelbranch niet gevonden::Kan branch '$TARGET_BRANCH' niet ophalen om snapshot en checkresultaten terug te schrijven."
+            echo "::error title=Doelbranch niet gevonden::Kan branch '$TARGET_BRANCH' niet ophalen om de gegenereerde documenten terug te schrijven."
             exit 1
           fi
 
           TARGET_SHA="$(git rev-parse "refs/remotes/origin/$TARGET_BRANCH")"
           if [[ "$TARGET_SHA" != "$GITHUB_SHA" ]]; then
-            echo "::error title=Doelbranch is gewijzigd::Branch '$TARGET_BRANCH' staat op $TARGET_SHA, maar deze workflow draait voor commit $GITHUB_SHA. Snapshot en checkresultaten worden daarom niet automatisch teruggeschreven."
+            echo "::error title=Doelbranch is gewijzigd::Branch '$TARGET_BRANCH' staat op $TARGET_SHA, maar deze workflow draait voor commit $GITHUB_SHA. De gegenereerde documenten worden daarom niet automatisch teruggeschreven."
             exit 1
           fi
 
@@ -50,7 +48,7 @@ jobs:
 
       - name: Prepare directories
         run: |
-          mkdir -p static $CHECK_DIR
+          mkdir -p static "$RUNNER_TEMP/nl-respec-validation"
 
       - name: Blokkeer raw.githubusercontent.com-links in bronbestand
         shell: bash
@@ -93,7 +91,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          PUBLICATION_DIR="$CHECK_DIR/publication"
+          PUBLICATION_DIR="$GITHUB_WORKSPACE/publication-validation"
           rm -rf "$PUBLICATION_DIR"
           mkdir -p "$PUBLICATION_DIR"
           cp snapshot.html "$PUBLICATION_DIR/index.html"
@@ -108,7 +106,7 @@ jobs:
         id: publication-html
         uses: anishathalye/proof-html@21330b795d4bca6c32743151abbdbda6d361ad9c # v2.2.4
         with:
-          directory: ${{ env.CHECK_DIR }}/publication
+          directory: publication-validation
           check_html: true
           check_css: false
           disable_external: true
@@ -192,7 +190,8 @@ jobs:
           curl -sf http://localhost:8080/snapshot.html > /dev/null || (echo "Local HTTP server on 8080 not reachable"; exit 1)
 
           set -o pipefail
-          RAW_WCAG="$CHECK_DIR/wcag-raw.json"
+          VALIDATION_DIR="$RUNNER_TEMP/nl-respec-validation"
+          RAW_WCAG="$VALIDATION_DIR/wcag-raw.json"
           if npx --yes @axe-core/cli@latest --stdout \
             --chrome-path "${{ steps.browser.outputs.chrome_bin }}" \
             --chromedriver-path "${{ steps.browser.outputs.chromedriver_bin }}" \
@@ -218,15 +217,15 @@ jobs:
                       ]
                     }
                   ]
-                ' "$RAW_WCAG" > $CHECK_DIR/wcag-report.json; then
-              echo "WCAG output saved to $CHECK_DIR/wcag-report.json"
+                ' "$RAW_WCAG" > "$VALIDATION_DIR/wcag-report.json"; then
+              echo "WCAG output saved to $VALIDATION_DIR/wcag-report.json"
             else
-              echo "{\"error\":\"WCAG-check mislukt: axe-output was geen geldige JSON. Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
-              echo "WCAG output saved to $CHECK_DIR/wcag-report.json (error)"
+              echo "{\"error\":\"WCAG-check mislukt: axe-output was geen geldige JSON. Zie logs voor details.\"}" > "$VALIDATION_DIR/wcag-report.json"
+              echo "WCAG output saved to $VALIDATION_DIR/wcag-report.json (error)"
             fi
           else
-            echo "{\"error\":\"WCAG-check mislukt (axe-cli). Zie logs voor details.\"}" > $CHECK_DIR/wcag-report.json
-            echo "WCAG output saved to $CHECK_DIR/wcag-report.json (error)"
+            echo "{\"error\":\"WCAG-check mislukt (axe-cli). Zie logs voor details.\"}" > "$VALIDATION_DIR/wcag-report.json"
+            echo "WCAG output saved to $VALIDATION_DIR/wcag-report.json (error)"
           fi
           rm -f "$RAW_WCAG"
 
@@ -237,14 +236,14 @@ jobs:
         with:
           args: >-
             --offline
-            --root-dir "${{ github.workspace }}/${{ env.CHECK_DIR }}/publication"
+            --root-dir "${{ github.workspace }}/publication-validation"
             './**/*.html'
           fail: true
           failIfEmpty: true
           format: markdown
           jobSummary: true
-          output: ${{ github.workspace }}/${{ env.CHECK_DIR }}/link-check.txt
-          workingDirectory: ${{ env.CHECK_DIR }}/publication
+          output: ${{ runner.temp }}/nl-respec-validation/link-check.txt
+          workingDirectory: ${{ github.workspace }}/publication-validation
 
       - name: Summarize publication preflight
         if: ${{ always() }}
@@ -277,6 +276,10 @@ jobs:
             kill "$SNAPSHOT_SERVER_PID" || true
           fi
 
+      - name: Remove validation working directory
+        if: ${{ always() }}
+        run: rm -rf "$GITHUB_WORKSPACE/publication-validation"
+
       - name: Commit all results
         if: ${{ steps.commit-target.outputs.should_commit == 'true' }}
         run: |
@@ -288,7 +291,7 @@ jobs:
             mv static/*.pdf .
           fi
 
-          git add snapshot.html $CHECK_DIR/*.txt $CHECK_DIR/*.json
+          git add snapshot.html
 
           if compgen -G "*.pdf" > /dev/null; then
             git add *.pdf
@@ -299,7 +302,7 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Snapshot + checks gegenereerd"
+          git commit -m "Snapshot gegenereerd"
 
           TARGET_BRANCH="${{ steps.commit-target.outputs.target_branch }}"
           git push origin HEAD:"$TARGET_BRANCH"
@@ -314,3 +317,13 @@ jobs:
             media/**/*
             js/**/*
             data/**/*
+
+      - name: Upload validation reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: validation-reports
+          path: |
+            ${{ runner.temp }}/nl-respec-validation/wcag-report.json
+            ${{ runner.temp }}/nl-respec-validation/link-check.txt
+          if-no-files-found: warn

@@ -9,6 +9,7 @@ import {
   requireArg,
   runCommand,
 } from "./lib/workflow-utils.mjs";
+import { migrateChecksDirectory } from "./lib/repository-migration.mjs";
 
 const MANAGED_FILES = [
   "workflows/build.yml",
@@ -181,9 +182,19 @@ async function createConfigMigrationPr(repo) {
 
     const stagedPaths = copyManagedFiles(repoDir);
     const removedPaths = removeDeprecatedManagedFiles(repoDir);
+    const migratedPaths = migrateChecksDirectory(repoDir);
     runCommand(
       "git",
-      ["add", "-A", "--", "config.js", "js/config.js", ...stagedPaths, ...removedPaths],
+      [
+        "add",
+        "-A",
+        "--",
+        "config.js",
+        "js/config.js",
+        ...stagedPaths,
+        ...removedPaths,
+        ...migratedPaths,
+      ],
       {
         cwd: repoDir,
         description: "git add migratiebestanden",
@@ -240,7 +251,8 @@ async function updateManagedFiles(repo) {
 
     const stagedPaths = copyManagedFiles(repoDir);
     const removedPaths = removeDeprecatedManagedFiles(repoDir);
-    runCommand("git", ["add", "-A", "--", ...stagedPaths, ...removedPaths], {
+    const migratedPaths = migrateChecksDirectory(repoDir);
+    runCommand("git", ["add", "-A", "--", ...stagedPaths, ...removedPaths, ...migratedPaths], {
       cwd: repoDir,
       description: "git add workflowbestanden",
     });
