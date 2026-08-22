@@ -156,7 +156,8 @@ async function createConfigMigrationPr(repo) {
     "Deze PR migreert de repository naar de actuele NL-ReSpec-template structuur.\n\n" +
     "Wijzigingen:\n" +
     "- verplaatst `config.js` naar `js/config.js`\n" +
-    "- voegt de beheerde GitHub Actions workflows uit de template toe of werkt ze bij\n\n" +
+    "- voegt de beheerde GitHub Actions workflows uit de template toe of werkt ze bij\n" +
+    "- verwijdert de verouderde `.checks`-map en bijbehorende `.gitignore`-regels\n\n" +
     "Na merge wordt de repo bij een volgende run automatisch opgenomen in `repos.json`, omdat `js/config.js` dan aanwezig is.";
 
   console.log("📦 config.js in root, nog niet in js/ — migratie-PR voorbereiden.");
@@ -254,7 +255,7 @@ async function updateManagedFiles(repo) {
     const migratedPaths = migrateChecksDirectory(repoDir);
     runCommand("git", ["add", "-A", "--", ...stagedPaths, ...removedPaths, ...migratedPaths], {
       cwd: repoDir,
-      description: "git add workflowbestanden",
+      description: "git add templatebestanden",
     });
 
     if (!gitDiffHasChanges(repoDir)) {
@@ -272,10 +273,10 @@ async function updateManagedFiles(repo) {
 
     runCommand(
       "git",
-      ["commit", "-m", "chore: update GitHub Actions workflows vanuit NL-ReSpec-template"],
+      ["commit", "-m", "chore: update templatebestanden vanuit NL-ReSpec-template"],
       {
         cwd: repoDir,
-        description: "git commit workflow-update",
+        description: "git commit template-update",
       },
     );
     runCommand("git", ["push", "origin", defaultBranch], {
@@ -317,7 +318,7 @@ for (const repo of allRepos) {
   try {
     const outcome = await createConfigMigrationPr(repo);
     if (outcome.result === "dry-run") {
-      migrationTargets.push(`${org}/${repo} (config.js → js/config.js + .github)`);
+      migrationTargets.push(`${org}/${repo} (config.js → js/config.js + templatebestanden)`);
     } else if (outcome.result === "created-pr" || outcome.result === "updated-pr") {
       migrationPrs += 1;
     }
@@ -371,7 +372,7 @@ console.log("");
 console.log("════════════════════════════════════════");
 console.log(`Samenvatting ${org}`);
 if (dryRun) {
-  console.log(`  Zou bijwerken (.github):     ${wouldUpdate.length}`);
+  console.log(`  Zou bijwerken (template):    ${wouldUpdate.length}`);
   for (const repo of wouldUpdate) {
     console.log(`    - ${repo}`);
   }
