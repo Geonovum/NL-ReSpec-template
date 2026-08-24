@@ -104,7 +104,7 @@ jobs:
 
       - name: Validate publication HTML
         id: publication-html
-        uses: anishathalye/proof-html@3cb0083534425b4902e6e77ac26ac3fe5b718f51 # v2.2.4
+        uses: anishathalye/proof-html@f060b7619c2410bd85d970459a60ef431cf47ed5 # v2.2.5
         with:
           directory: publication-validation
           check_html: true
