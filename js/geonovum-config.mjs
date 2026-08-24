@@ -1,8 +1,11 @@
 // Dit bestand is gepubliceerd als https://tools.geostandaarden.nl/respec/config/geonovum-config.js, voor hergebruik in Geonovum ReSpec documenten.
+
+// mermaid.mjs/generateMermaidFigures plugin is intended for .mermaid files. Has negative side effects.
+// import { generateMermaidFigures } from "https://logius-standaarden.github.io/publicatie/respec/plugins/mermaid.mjs";
+
 var organisationConfig = {
   nl_organisationName: "Geonovum",
-  // werkt nog niet
-  // ILaR: pat naar bro/dso bestaat niet
+  // ILaR: path naar bro/dso bestaat niet
   nl_organisationStylesURL: "https://tools.geostandaarden.nl/respec/style/",
   // bv styles url voor ander GN publicatiedomein met eigen stijlen zoals DSO of BRO:
   // nl_organisationStylesURL: "https://tools.geostandaarden.nl/respec/dso/style/",
@@ -19,7 +22,9 @@ var organisationConfig = {
     }
   ],
 
-  postProcess: [window.respecMermaid.createFigures],
+  // !important: order of mermaid figure handling
+  // mermaid.mjs/generateMermaidFigures plugin is intended for .mermaid files. Has negative side effects.
+  postProcess: [window.respecMermaid.createFigures], //, generateMermaidFigures ],
 
   latestVersion: [
     "nl_organisationPublishURL",
@@ -1325,22 +1330,29 @@ export function loadRespecWithConfiguration(localConfig) {
   respecConfig.postProcess = [
     ...(respecConfig.postProcess || []),
     // to fix mermaid 1.3.0 zero width
+    // #issue mermaid missing alt text        
     (config, document) => {
       const mermaidImages = document.querySelectorAll('figure pre img');
       for (const img of mermaidImages) {
-        // Handle image load success  
-        img.onload = (e) => { 
-          const imgEl = e.target; 
-          if (imgEl.width == 0) { 
-          //if (imgEl.naturalWidth < imgEl.naturalHeight) {
-          //   imgEl.width = imgEl.naturalWidth;
-          //   imgEl.height = imgEl.naturalHeight;            
-          //} else {
-            imgEl.width = imgEl.naturalWidth/2;
-            imgEl.height = imgEl.naturalHeight/2;             
-          //}
-          }
-        };
+        if (img.naturalWidth > 0 && img.width == 0) {
+            img.width = img.naturalWidth/3*2;
+            img.height = img.naturalHeight/3*2;
+        }
+        else {
+          // Handle image load success
+          img.onload = (e) => { 
+            const imgEl = e.target; 
+            if (imgEl.width == 0) { 
+            //if (imgEl.naturalWidth < imgEl.naturalHeight) {
+            //   imgEl.width = imgEl.naturalWidth;
+            //   imgEl.height = imgEl.naturalHeight;            
+            //} else {
+              imgEl.width = imgEl.naturalWidth/3*2;
+              imgEl.height = imgEl.naturalHeight/3*2;
+            //}
+            }
+          };
+        }
       }
     // },
     // (config, document) => {
@@ -1369,7 +1381,7 @@ export function loadRespecWithConfiguration(localConfig) {
 
    globalThis.respecConfig = respecConfig;
 
-  //import("https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js");
-  import("https://logius-standaarden.github.io/publicatie/respec/builds/respec-nlgov.js");
+  import("https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js");
+  //import("https://logius-standaarden.github.io/publicatie/respec/builds/respec-nlgov.js");
 
 }
