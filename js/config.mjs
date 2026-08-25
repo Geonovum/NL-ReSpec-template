@@ -1,5 +1,5 @@
-//import { loadRespecWithConfiguration } from "https://tools.geostandaarden.nl/respec/config/geonovum-config.mjs";
-import { loadRespecWithConfiguration } from "./geonovum-config.mjs";
+import { loadRespecWithConfiguration } from "https://tools.geostandaarden.nl/respec/config/geonovum-config.mjs";
+//import { loadRespecWithConfiguration } from "./geonovum-config.mjs";
 
 let respecConfig = {
   useLogo: true,    // Default true
