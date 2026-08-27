@@ -26,15 +26,15 @@ Voor het aanpassen van het document raden we aan om een IDE te gebruiken, zoals 
 
 ### Aanpassen van content
 
-* Pas instellingen aan in de configuratiebestanden (`config.js`)
+* Pas instellingen aan in het configuratiebestand (`config.mjs`)
 * Voeg markdown-bestanden toe of wijzig bestaande bestanden
 
 ### Configuratiebestanden
 
-* [`js/config.js`](js/config.js): bevat document-specifieke instellingen zoals titel, status en auteurs
-* [`organisation-config.js`](https://tools.geostandaarden.nl/respec/config/geonovum-config.js): bevat algemene informatie over de organisatie
+* [`js/config.mjs`](js/config.mjs): bevat document-specifieke instellingen zoals titel, status en auteurs en importeert
+** [`organisation-config.mjs`](https://tools.geostandaarden.nl/respec/config/geonovum-config.mjs): bevat algemene instellingen en informatie over de organisatie
 
-Beide bestanden worden gelinkt in de [`index.html`](index.html)
+Eerste bestand worden gelinkt in de [`index.html`](index.html)
 
 ### Content schrijven
 
@@ -56,6 +56,11 @@ CSS-classes zijn ook bruikbaar in markdown via HTML:
 Meer info: [ReSpec documentatie](https://respec.org/docs/#css-classes)
 
 ---
+
+## Automatische ReSpec postProcessing voor fixs
+
+1. Fix om mermaid afbeeldinge te corrigeren zodat ze zichtbaar zijn (solveMermaidZeroWidth)
+2. Fix voor vertaling NL-github-links (localizeGitHubHeaderLinks)
 
 ## Automatische checks en build
 
@@ -107,7 +112,7 @@ oplossen.
 💡 Dit publiceert je document automatisch op:
 https://test.docs.geostandaarden.nl/
 
-(De exacte URL wordt bepaald door waarden in `config.js`)
+(De exacte URL wordt bepaald door waarden in `config.mjs`)
 
 ### Release (productieomgeving)
 
