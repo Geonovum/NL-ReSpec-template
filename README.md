@@ -26,15 +26,16 @@ Voor het aanpassen van het document raden we aan om een IDE te gebruiken, zoals 
 
 ### Aanpassen van content
 
-* Pas instellingen aan in de configuratiebestanden (`config.js`)
+* Pas instellingen aan in het configuratiebestand (`config.mjs`)
 * Voeg markdown-bestanden toe of wijzig bestaande bestanden
 
-### Configuratiebestanden
+### Configuratiebestand
 
-* [`js/config.js`](js/config.js): bevat document-specifieke instellingen zoals titel, status en auteurs
-* [`organisation-config.js`](https://tools.geostandaarden.nl/respec/config/geonovum-config.js): bevat algemene informatie over de organisatie
+[`js/config.mjs`](js/config.mjs): 
+* bevat document-specifieke instellingen zoals titel, status en auteurs
+* importeert [organisatie-specifieke instellingen](https://tools.geostandaarden.nl/respec/config/geonovum-config.js) vanaf tools
 
-Beide bestanden worden gelinkt in de [`index.html`](index.html)
+Bestand wordt gekoppeld in de [`index.html`](index.html)
 
 ### Content schrijven
 
@@ -61,8 +62,8 @@ Meer info: [ReSpec documentatie](https://respec.org/docs/#css-classes)
 
 De GitHub Actions workflow draait automatisch bij iedere commit of bij een GitHub Release. Daarbij gebeuren de volgende stappen:
 
-1. HTML wordt gegenereerd met [ReSpec](https://respec.org/)
-2. (optioneel) PDF wordt gegenereerd — indien `alternateFormats` is ingesteld in `config.js`:
+1. HTML snapshot wordt gegenereerd met [ReSpec](https://respec.org/)
+2. (optioneel) PDF wordt gegenereerd — indien `alternateFormats` is ingesteld in `config.mjs`:
 
 ```js
 alternateFormats: [
@@ -98,7 +99,7 @@ Wanneer je document klaar is, publiceer je via **GitHub Releases**:
 💡 Dit publiceert je document automatisch op:
 https://test.docs.geostandaarden.nl/
 
-(De exacte URL wordt bepaald door waarden in `config.js`)
+(De exacte URL wordt bepaald door waarden in `config.mjs`)
 
 ### Release (productieomgeving)
 
@@ -123,6 +124,8 @@ bijgewerkt worden vanuit deze template via de workflow
 **"Update workflows in document repos"**.
 
 ### Repos bijhouden (automatisch)
+
+** NOTE ** ToDo config.mjs
 
 Bij elke run wordt [`.github/repos.json`](.github/repos.json) eerst
 automatisch bijgewerkt:
