@@ -1,2 +1,4 @@
 ﻿*_log
 .idea
+node_modules/**
+package*.json
