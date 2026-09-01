@@ -9,6 +9,7 @@ import yaml
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 BUILD_WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "build.yml"
+PUBLISH_WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "publish.yml"
 RESPEC_CONFIG = REPOSITORY_ROOT / "js" / "config.js"
 
 
@@ -19,6 +20,15 @@ def build_steps() -> list[dict]:
 
 def find_step(name: str) -> dict | None:
     return next((step for step in build_steps() if step.get("name") == name), None)
+
+
+def publish_steps() -> list[dict]:
+    workflow = yaml.safe_load(PUBLISH_WORKFLOW.read_text(encoding="utf-8"))
+    return workflow["jobs"]["release"]["steps"]
+
+
+def find_publish_step(name: str) -> dict | None:
+    return next((step for step in publish_steps() if step.get("name") == name), None)
 
 
 class PublicationPreflightTest(unittest.TestCase):
@@ -41,7 +51,7 @@ class PublicationPreflightTest(unittest.TestCase):
         self.assertIsNotNone(generate)
         self.assertIn("npx --yes respec@37.3.2", generate["run"])
 
-    def test_prepares_the_same_content_tree_that_publish_uses(self) -> None:
+    def test_validation_tree_keeps_assets_but_excludes_respec_source_fragments(self) -> None:
         step = find_step("Prepare publication for validation")
         self.assertIsNotNone(step, "De build moet het toekomstige publicatiepakket voorbereiden.")
 
@@ -52,6 +62,12 @@ class PublicationPreflightTest(unittest.TestCase):
                 target = source / asset_directory
                 target.mkdir()
                 (target / "asset.txt").write_text(asset_directory, encoding="utf-8")
+                fragments = target / "nested"
+                fragments.mkdir()
+                (fragments / "model.respec.html").write_text("fragment", encoding="utf-8")
+                (fragments / "model.respec.catalog.xhtml").write_text(
+                    "catalog", encoding="utf-8"
+                )
 
             stale = source / "publication-validation"
             stale.mkdir(parents=True)
@@ -78,6 +94,66 @@ class PublicationPreflightTest(unittest.TestCase):
                     (publication / asset_directory / "asset.txt").read_text(encoding="utf-8"),
                     asset_directory,
                 )
+                self.assertFalse(
+                    (publication / asset_directory / "nested" / "model.respec.html").exists()
+                )
+                self.assertFalse(
+                    (
+                        publication
+                        / asset_directory
+                        / "nested"
+                        / "model.respec.catalog.xhtml"
+                    ).exists()
+                )
+
+            published_html = sorted(
+                path.relative_to(publication).as_posix()
+                for path in publication.rglob("*")
+                if path.is_file() and path.suffix.lower() in {".html", ".xhtml"}
+            )
+            self.assertEqual(published_html, ["index.html"])
+
+    def test_publish_content_keeps_assets_but_excludes_respec_source_fragments(self) -> None:
+        step = find_publish_step("Prepare content")
+        self.assertIsNotNone(step, "De publicatie moet het definitieve contentpakket voorbereiden.")
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory)
+            (source / "snapshot.html").write_text("snapshot", encoding="utf-8")
+            for asset_directory in ("data", "media", "js", "css"):
+                target = source / asset_directory
+                target.mkdir()
+                (target / "asset.txt").write_text(asset_directory, encoding="utf-8")
+                fragments = target / "nested"
+                fragments.mkdir()
+                (fragments / "model.respec.html").write_text("fragment", encoding="utf-8")
+                (fragments / "model.respec.catalog.xhtml").write_text(
+                    "catalog", encoding="utf-8"
+                )
+
+            subprocess.run(
+                ["bash", "-euo", "pipefail", "-c", step["run"]],
+                cwd=source,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            content = source / "content"
+            self.assertEqual((content / "index.html").read_text(encoding="utf-8"), "snapshot")
+            for asset_directory in ("data", "media", "js", "css"):
+                self.assertEqual(
+                    (content / asset_directory / "asset.txt").read_text(encoding="utf-8"),
+                    asset_directory,
+                )
+                self.assertFalse(
+                    (content / asset_directory / "nested" / "model.respec.html").exists()
+                )
+                self.assertFalse(
+                    (
+                        content / asset_directory / "nested" / "model.respec.catalog.xhtml"
+                    ).exists()
+                )
 
     def test_html_validation_is_blocking_for_the_publication_tree(self) -> None:
         step = find_step("Validate publication HTML")
@@ -94,7 +170,7 @@ class PublicationPreflightTest(unittest.TestCase):
         self.assertIs(step["with"]["disable_external"], True)
         self.assertIs(step["with"]["ignore_empty_alt"], True)
 
-    def test_lychee_checks_every_published_html_file_and_fails_on_errors(self) -> None:
+    def test_lychee_checks_only_generated_index_and_fails_on_errors(self) -> None:
         step = find_step("Validate publication links")
         self.assertIsNotNone(step, "De build moet publicatielinks met Lychee valideren.")
 
@@ -108,7 +184,8 @@ class PublicationPreflightTest(unittest.TestCase):
         )
         self.assertIn("--offline", step["with"]["args"])
         self.assertIn("--root-dir", step["with"]["args"])
-        self.assertIn("./**/*.html", step["with"]["args"])
+        self.assertIn("./index.html", step["with"]["args"])
+        self.assertNotIn("./**/*.html", step["with"]["args"])
 
     def test_validation_reports_are_artifacts_and_not_committed(self) -> None:
         commit_step = find_step("Commit all results")
