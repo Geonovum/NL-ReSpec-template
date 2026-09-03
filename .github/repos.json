@@ -297,7 +297,7 @@
         "respecVersion": "35.4.1"
       },
       "KBI-WOZ-advies": {
-        "updateAllow": false,
+        "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
         "respecVersion": null
       },
