@@ -14,6 +14,7 @@ import { migrateChecksDirectory } from "./lib/repository-migration.mjs";
 const MANAGED_FILES = [
   "workflows/build.yml",
   "workflows/main.yml",
+  "workflows/normalize-mermaid-svg.mjs",
   "workflows/pdf.js",
   "workflows/publish.yml",
   "workflows/visual-regression.yml",
