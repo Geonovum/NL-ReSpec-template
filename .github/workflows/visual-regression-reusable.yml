@@ -182,6 +182,15 @@ jobs:
             fi
 
             npx --yes respec --localhost --disable-sandbox --src "$SOURCE" --out "$SNAPSHOT"
+
+            # Gebruik de normalizer van deze checkout, zoals de publicatiebuild.
+            # Een gecommitte base-snapshot blijft de werkelijk bewaarde baseline.
+            if [[ -f .github/workflows/normalize-mermaid-svg.mjs ]]; then
+              if [[ -f .github/mermaid-svg/package-lock.json ]]; then
+                (cd .github/mermaid-svg && npm ci --ignore-scripts --no-audit --no-fund)
+              fi
+              node .github/workflows/normalize-mermaid-svg.mjs "$SNAPSHOT"
+            fi
           }
 
           if [[ -f "$GITHUB_WORKSPACE/$WORK_DIR/base/$SNAPSHOT" ]]; then

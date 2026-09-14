@@ -12,6 +12,8 @@ import {
 import { migrateChecksDirectory } from "./lib/repository-migration.mjs";
 
 const MANAGED_FILES = [
+  "mermaid-svg/package.json",
+  "mermaid-svg/package-lock.json",
   "workflows/build.yml",
   "workflows/main.yml",
   "workflows/normalize-mermaid-svg.mjs",

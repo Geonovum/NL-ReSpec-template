@@ -83,7 +83,9 @@ jobs:
 
       - name: Normaliseer mermaid-diagrammen in snapshot
         run: |
+          set -euo pipefail
           if [ -f .github/workflows/normalize-mermaid-svg.mjs ]; then
+            (cd .github/mermaid-svg && npm ci --ignore-scripts --no-audit --no-fund)
             node .github/workflows/normalize-mermaid-svg.mjs snapshot.html
           else
             echo "::warning title=Normalisatie overgeslagen::.github/workflows/normalize-mermaid-svg.mjs ontbreekt; mermaid-diagrammen zijn niet genormaliseerd."

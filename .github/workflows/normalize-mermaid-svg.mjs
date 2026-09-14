@@ -1,166 +1,180 @@
 #!/usr/bin/env node
-// Normaliseert de inline SVG die mermaid in de ReSpec-snapshot genereert, zodat
-// het resultaat door de Nu HTML-validator (vnu) komt.
-//
-// Mermaid gebruikt voor zijn <defs> vaste, niet-genamespacete id's
-// (`arrowhead`, `computer`, `flowchart-pointEnd`, ...). Zodra een publicatie
-// meer dan één diagram van hetzelfde type bevat, staan die id's dubbel in het
-// document en meldt vnu "Duplicate ID". Daarnaast laat mermaid interne
-// layout-attributen (`label-offset-x`/`label-offset-y`) op <g>-elementen staan;
-// die bestaan niet in SVG en leveren "Attribute ... not allowed on element g".
-//
-// Deze normalisatie:
-//   1. geeft dubbele id's binnen een inline <svg> een prefix op basis van de
-//      id van dat <svg>-element, en herschrijft alle verwijzingen ernaar
-//      (url(#id), href/xlink:href, CSS-selectors, aria-labelledby/-describedby);
-//   2. verwijdert de mermaid-interne layout-attributen.
-//
-// Alleen de inhoud van inline <svg>-elementen wordt aangepast. Id's van
-// ReSpec zelf (sectie-ankers en dergelijke) blijven ongemoeid, zodat
-// permalinks niet breken.
-//
-// Gebruik: node normalize-mermaid-svg.mjs <bestand.html> [meer bestanden...]
-
+// Normaliseer alleen Mermaid-uitvoer, vóór HTML-validatie, PDF en publicatie.
+// Installatie: (cd .github/mermaid-svg && npm ci --ignore-scripts)
+// Gebruik: node .github/workflows/normalize-mermaid-svg.mjs snapshot.html [...]
 import { readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 
-// Attributen die mermaid achterlaat en die niet in SVG bestaan.
-const STRIP_ATTRIBUTES = ["label-offset-x", "label-offset-y"];
+// Een eigen dependency-directory: verander geen package.json van documentrepos.
+const require = createRequire(new URL("../mermaid-svg/package.json", import.meta.url));
+const { parse } = await import(require.resolve("parse5"));
+const css = require("css-tree");
+const SVG = "http://www.w3.org/2000/svg";
+const IDREFS = new Set([
+  "aria-labelledby", "aria-describedby", "aria-controls", "aria-owns",
+  "aria-activedescendant", "aria-details", "aria-errormessage", "aria-flowto",
+]);
+const URL_ATTRIBUTES = new Set([
+  "fill", "stroke", "filter", "clip-path", "mask", "marker", "marker-start",
+  "marker-mid", "marker-end", "cursor", "color-profile",
+]);
 
-const ID_ATTRIBUTE = /\sid="([^"]*)"/g;
+function* elements(node) {
+  if (node.tagName) yield node;
+  for (const child of node.childNodes ?? []) yield* elements(child);
+}
 
-/**
- * Zoekt de buitenste <svg>-elementen in de HTML. Geneste <svg>'s worden
- * meegenomen in het bereik van hun ouder.
- */
-function findSvgRanges(html) {
-  const tag = /<svg\b[^>]*>|<\/svg\s*>/gi;
-  const ranges = [];
-  let depth = 0;
-  let start = -1;
-  let match;
+function attr(node, name) {
+  return node.attrs?.find(attribute => attribute.name === name)?.value ?? "";
+}
 
-  while ((match = tag.exec(html)) !== null) {
-    if (match[0].startsWith("</")) {
-      if (depth === 0) continue; // ongebalanceerde sluittag: negeren
-      depth -= 1;
-      if (depth === 0) {
-        ranges.push({ start, end: match.index + match[0].length });
-        start = -1;
+function textContent(node) {
+  return (node.childNodes ?? []).map(child => child.value ?? textContent(child)).join("");
+}
+
+function isMermaid(svg) {
+  // Mermaid's eigen container blijft bestaan bij rechtstreeks gebruik.
+  for (let node = svg; node; node = node.parentNode) {
+    if (attr(node, "class").split(/\s+/).includes("mermaid")) return true;
+  }
+  // respec-mermaid 1.0.1 verwijdert de .mermaid-container. De gegenereerde
+  // diagram-id EN Mermaid-styles herkennen ook flowcharts zonder ARIA/title.
+  // 1.3.0 maakt <img src="data:image/svg+xml;base64,...">: die blijven intact.
+  return /^diagram-\d+$/.test(attr(svg, "id")) && [...elements(svg)].some(node =>
+    node.tagName === "style" && textContent(node).includes("--mermaid-font-family"));
+}
+
+function applyEdits(source, edits) {
+  for (const { start, end, value } of edits.sort((a, b) => b.start - a.start)) {
+    source = source.slice(0, start) + value + source.slice(end);
+  }
+  return source;
+}
+
+function escapeText(value) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function localFragment(value, renames) {
+  return value.startsWith("#") && renames.has(value.slice(1))
+    ? `#${renames.get(value.slice(1))}` : value;
+}
+
+function rewriteCss(source, context, renames) {
+  if (renames.size === 0) return source;
+  const edits = [];
+  const tree = css.parse(source, { context, positions: true, parseCustomProperty: true });
+  css.walk(tree, node => {
+    let value;
+    if (node.type === "IdSelector") {
+      const renamed = renames.get(css.ident.decode(node.name));
+      if (renamed) value = `#${css.ident.encode(renamed)}`;
+    } else if (node.type === "Url") {
+      const renamed = localFragment(node.value, renames);
+      if (renamed !== node.value) value = css.generate({ ...node, value: renamed });
+    } else if (node.type === "AttributeSelector" && node.value) {
+      const name = css.ident.decode(node.name.name);
+      const original = node.value.type === "String"
+        ? node.value.value : css.ident.decode(node.value.name);
+      let renamed = original;
+      if (name === "id" && node.matcher === "=") renamed = renames.get(original) ?? original;
+      else if (["href", "xlink|href", "*|href"].includes(name) && node.matcher === "=") {
+        renamed = localFragment(original, renames);
+      } else if (IDREFS.has(name) && ["=", "~="].includes(node.matcher)) {
+        renamed = original.replace(/\S+/g, id => renames.get(id) ?? id);
       }
-      continue;
+      if (renamed !== original) {
+        edits.push({ start: node.value.loc.start.offset, end: node.value.loc.end.offset,
+          value: node.value.type === "String" ? css.string.encode(renamed) : css.ident.encode(renamed) });
+      }
     }
-
-    if (depth === 0) start = match.index;
-    // Zelfsluitende <svg/> komt niet voor in mermaid-output, maar vang het af.
-    if (!/\/>$/.test(match[0])) depth += 1;
-    else if (depth === 0) {
-      ranges.push({ start, end: match.index + match[0].length });
-      start = -1;
+    // Gewone CSS strings (zoals content), kleuren en externe URLs blijven intact.
+    if (value !== undefined) {
+      edits.push({ start: node.loc.start.offset, end: node.loc.end.offset, value });
     }
-  }
-
-  return ranges;
-}
-
-function collectIdCounts(html) {
-  const counts = new Map();
-  for (const match of html.matchAll(ID_ATTRIBUTE)) {
-    counts.set(match[1], (counts.get(match[1]) ?? 0) + 1);
-  }
-  return counts;
-}
-
-function rootId(svg) {
-  const openTag = svg.slice(0, svg.indexOf(">") + 1);
-  return openTag.match(/\sid="([^"]*)"/)?.[1] ?? "";
-}
-
-/**
- * Herschrijft dubbele id's binnen één inline <svg> en alle verwijzingen daarnaar.
- */
-function rewriteDuplicateIds(svg, index, idCounts, takenIds) {
-  const prefix = `${rootId(svg) || `svg-${index + 1}`}-`;
-  const renames = new Map();
-
-  for (const match of svg.matchAll(ID_ATTRIBUTE)) {
-    const id = match[1];
-    if (renames.has(id)) continue;
-    if ((idCounts.get(id) ?? 0) < 2) continue;
-
-    let candidate = `${prefix}${id}`;
-    let suffix = 2;
-    while (takenIds.has(candidate)) candidate = `${prefix}${id}-${suffix++}`;
-    takenIds.add(candidate);
-    renames.set(id, candidate);
-  }
-
-  if (renames.size === 0) return { svg, renames };
-
-  // Eén enkele pass, zodat een nieuwe id niet nogmaals wordt herschreven.
-  const pattern =
-    /(\sid=")([^"]*)(")|(\s(?:aria-labelledby|aria-describedby)=")([^"]*)(")|#([A-Za-z_][\w.:-]*)/g;
-
-  const rewritten = svg.replace(
-    pattern,
-    (whole, idPre, idValue, idPost, ariaPre, ariaValue, ariaPost, hashId) => {
-      if (idPre !== undefined) {
-        return `${idPre}${renames.get(idValue) ?? idValue}${idPost}`;
-      }
-      if (ariaPre !== undefined) {
-        const tokens = ariaValue
-          .split(/\s+/)
-          .map((token) => renames.get(token) ?? token);
-        return `${ariaPre}${tokens.join(" ")}${ariaPost}`;
-      }
-      return `#${renames.get(hashId) ?? hashId}`;
-    },
-  );
-
-  return { svg: rewritten, renames };
-}
-
-function stripInvalidAttributes(svg) {
-  let stripped = 0;
-  for (const attribute of STRIP_ATTRIBUTES) {
-    const pattern = new RegExp(`\\s${attribute}="[^"]*"`, "g");
-    svg = svg.replace(pattern, () => {
-      stripped += 1;
-      return "";
-    });
-  }
-  return { svg, stripped };
+  });
+  return applyEdits(source, edits);
 }
 
 function normalize(html) {
-  const ranges = findSvgRanges(html);
-  if (ranges.length === 0) return { html, renamed: 0, stripped: 0, svgCount: 0 };
-
-  const idCounts = collectIdCounts(html);
-  const takenIds = new Set(idCounts.keys());
-
-  let output = "";
-  let cursor = 0;
+  const document = parse(html, { sourceCodeLocationInfo: true });
+  const nodes = [...elements(document)];
+  const counts = new Map();
+  for (const node of nodes) {
+    const id = attr(node, "id");
+    if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  const taken = new Set(counts.keys());
+  const edits = [];
   let renamed = 0;
   let stripped = 0;
-
-  ranges.forEach((range, index) => {
-    output += html.slice(cursor, range.start);
-
-    let svg = html.slice(range.start, range.end);
-    const idResult = rewriteDuplicateIds(svg, index, idCounts, takenIds);
-    svg = idResult.svg;
-    renamed += idResult.renames.size;
-
-    const attributeResult = stripInvalidAttributes(svg);
-    svg = attributeResult.svg;
-    stripped += attributeResult.stripped;
-
-    output += svg;
-    cursor = range.end;
+  const diagrams = nodes.filter(node => {
+    if (node.namespaceURI !== SVG || node.tagName !== "svg") return false;
+    for (let parent = node.parentNode; parent; parent = parent.parentNode) {
+      if (parent.namespaceURI === SVG && parent.tagName === "svg" && isMermaid(parent)) return false;
+    }
+    return isMermaid(node);
   });
 
-  output += html.slice(cursor);
-  return { html: output, renamed, stripped, svgCount: ranges.length };
+  diagrams.forEach((svg, index) => {
+    const descendants = [...elements(svg)];
+    const renames = new Map();
+    const prefix = attr(svg, "id") || `mermaid-${index + 1}`;
+    const localIds = new Set();
+    for (const node of descendants) {
+      const id = attr(node, "id");
+      if (!id) continue;
+      // Meerdere definities binnen hetzelfde diagram hebben geen eenduidig
+      // doel voor references. Niet stilzwijgend een willekeurig doel kiezen.
+      if (localIds.has(id)) throw new Error(`Dubbele id binnen Mermaid-diagram ${prefix}: ${id}`);
+      localIds.add(id);
+      // Het buitenste SVG is een mogelijk figuuranker; laat dat intact.
+      if (node === svg || counts.get(id) < 2) continue;
+      let candidate = `${prefix}-${id}`;
+      let suffix = 2;
+      while (taken.has(candidate)) candidate = `${prefix}-${id}-${suffix++}`;
+      taken.add(candidate);
+      renames.set(id, candidate);
+    }
+    renamed += renames.size;
+
+    for (const node of descendants) {
+      for (const attribute of node.attrs ?? []) {
+        const name = attribute.prefix ? `${attribute.prefix}:${attribute.name}` : attribute.name;
+        const location = node.sourceCodeLocation?.attrs?.[name];
+        if (!location) continue;
+        const original = attribute.value;
+        let value = original;
+        if (node.namespaceURI === SVG && node.tagName === "g" &&
+            ["label-offset-x", "label-offset-y"].includes(name)) {
+          edits.push({ start: location.startOffset, end: location.endOffset, value: "" });
+          stripped++;
+          continue;
+        }
+        if (name === "id" && node !== svg) value = renames.get(value) ?? value;
+        else if (name === "href" || name === "xlink:href") value = localFragment(value, renames);
+        else if (IDREFS.has(name)) value = value.replace(/\S+/g, id => renames.get(id) ?? id);
+        else if (name === "style") value = rewriteCss(value, "declarationList", renames);
+        else if (URL_ATTRIBUTES.has(name)) value = rewriteCss(value, "value", renames);
+        if (value !== original) {
+          edits.push({ start: location.startOffset, end: location.endOffset,
+            value: `${name}="${escapeText(value).replaceAll('"', "&quot;")}"` });
+        }
+      }
+      if (node.namespaceURI === SVG && node.tagName === "style") {
+        const original = textContent(node);
+        const value = rewriteCss(original, "stylesheet", renames);
+        if (value !== original) {
+          const location = node.sourceCodeLocation;
+          edits.push({ start: location.startTag.endOffset, end: location.endTag.startOffset,
+            value: escapeText(value) });
+        }
+      }
+    }
+  });
+  // Alleen gewijzigde attributen en SVG-styles terugschrijven. De overige HTML,
+  // tekst, comments, scripts, afbeeldingen en ReSpec-ankers blijven bytegelijk.
+  return { html: applyEdits(html, edits), renamed, stripped, svgCount: diagrams.length };
 }
 
 const files = process.argv.slice(2);
@@ -168,19 +182,10 @@ if (files.length === 0) {
   console.error("Gebruik: node normalize-mermaid-svg.mjs <bestand.html> [...]");
   process.exit(2);
 }
-
 for (const file of files) {
   const original = readFileSync(file, "utf8");
   const { html, renamed, stripped, svgCount } = normalize(original);
-
-  if (html === original) {
-    console.log(`${file}: ${svgCount} inline SVG('s), niets aan te passen.`);
-    continue;
-  }
-
-  writeFileSync(file, html);
-  console.log(
-    `${file}: ${svgCount} inline SVG('s) genormaliseerd — ` +
-      `${renamed} dubbele id('s) herschreven, ${stripped} ongeldig(e) attribu(u)t(en) verwijderd.`,
-  );
+  if (html !== original) writeFileSync(file, html);
+  console.log(`${file}: ${svgCount} Mermaid SVG('s), ${renamed} dubbele id('s) herschreven, ` +
+    `${stripped} ongeldig(e) attribu(u)t(en) verwijderd.`);
 }
