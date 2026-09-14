@@ -118,15 +118,33 @@ jobs:
 
       - name: Validate publication HTML
         id: publication-html
-        uses: anishathalye/proof-html@f060b7619c2410bd85d970459a60ef431cf47ed5 # v2.2.5
-        with:
-          directory: publication-validation
-          check_html: true
-          check_css: false
-          disable_external: true
-          check_external_hash: false
-          enforce_https: false
-          ignore_empty_alt: true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --entrypoint java \
+            --volume "$GITHUB_WORKSPACE/publication-validation:/site:ro" \
+            anishathalye/proof-html@sha256:4659086c07e94aaa9e93d7793fed323ffb575839db37b5bff3e8a59b2ec83c97 \
+            -jar /bin/vnu.jar \
+            --errors-only \
+            --skip-non-html \
+            /site/index.html
+
+      - name: Check publication assets
+        id: publication-assets
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --entrypoint ruby \
+            --volume "$GITHUB_WORKSPACE/publication-validation:/site:ro" \
+            anishathalye/proof-html@sha256:4659086c07e94aaa9e93d7793fed323ffb575839db37b5bff3e8a59b2ec83c97 \
+            -rhtml-proofer \
+            -e 'options = { checks: %w[Links Scripts Images Favicon OpenGraph], check_external_hash: false, ignore_empty_alt: true, enforce_https: false, disable_external: true }; HTMLProofer.check_file(ARGV.fetch(0), options).run' \
+            /site/index.html
 
       - name: Check for alternateFormats via Node
         id: config
@@ -263,6 +281,7 @@ jobs:
         if: ${{ always() }}
         run: |
           HTML_OUTCOME="${{ steps.publication-html.outcome }}"
+          ASSET_OUTCOME="${{ steps.publication-assets.outcome }}"
           LINK_OUTCOME="${{ steps.publication-links.outcome }}"
           BUILD_STATUS="${{ job.status }}"
 
@@ -272,11 +291,12 @@ jobs:
             echo "| Controle | Resultaat |"
             echo "| --- | --- |"
             echo "| HTML | $HTML_OUTCOME |"
+            echo "| Assets | $ASSET_OUTCOME |"
             echo "| Links | $LINK_OUTCOME |"
             echo "| Build | $BUILD_STATUS |"
             echo
 
-            if [[ "$BUILD_STATUS" == "success" && "$HTML_OUTCOME" == "success" && "$LINK_OUTCOME" == "success" ]]; then
+            if [[ "$BUILD_STATUS" == "success" && "$HTML_OUTCOME" == "success" && "$ASSET_OUTCOME" == "success" && "$LINK_OUTCOME" == "success" ]]; then
               echo "✅ **Publicatiegereed: ja**"
             else
               echo "❌ **Publicatiegereed: nee**"
