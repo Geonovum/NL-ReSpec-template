@@ -16,6 +16,7 @@ NORMALIZER = REPOSITORY_ROOT / ".github" / "workflows" / "normalize-mermaid-svg.
 UPDATE_SCRIPT = REPOSITORY_ROOT / "scripts" / "update-document-repos.mjs"
 
 ID_ATTRIBUTE = re.compile(r'\sid="([^"]*)"')
+FOREIGN_OBJECT = re.compile(r"<foreignObject[^>]*>")
 
 # Twee diagrammen zoals mermaid ze genereert: identieke <defs>-id's, plus een
 # intern layout-attribuut dat niet in SVG bestaat.
@@ -199,6 +200,24 @@ class MermaidContentPreservationTest(unittest.TestCase):
         self.assertEqual(2, result.count('fill:#fff'))
         self.assertIn('url(#diagram-1-fff)', result)
 
+    def test_missing_foreign_object_height_is_completed(self):
+        # vnu eist width én height; mermaid laat height soms weg.
+        content = ('<foreignObject width="85.9"><div>Label</div></foreignObject>'
+                   '<foreignObject width="12" height="48"></foreignObject>')
+        result = normalize(self.with_content(content))
+        self.assertEqual(2, result.count('<foreignObject width="85.9" height="24">'))
+        self.assertEqual(2, result.count('<foreignObject width="12" height="48">'))
+        self.assertEqual(result, normalize(result))
+
+    def test_self_closing_foreign_object_keeps_its_syntax(self):
+        result = normalize(self.with_content('<foreignObject width="7"/>'))
+        self.assertEqual(2, result.count('<foreignObject width="7" height="24"/>'))
+
+    def test_foreign_object_outside_a_mermaid_diagram_is_untouched(self):
+        ordinary = '<svg id="brand"><foreignObject width="10"></foreignObject></svg>'
+        self.assertEqual(ordinary, normalize(ordinary))
+        self.assertIn(ordinary, normalize(self.with_content('') + ordinary))
+
     def test_non_mermaid_svgs_are_byte_identical(self):
         ordinary = ('<svg id="brand-one"><defs><path id="fff"></path></defs>'
                     '<path fill="#fff" label-offset-x="2"></path></svg>'
@@ -268,6 +287,11 @@ class MermaidProductionFixtureTest(unittest.TestCase):
         self.assertEqual([], [identifier for identifier, count in
                              Counter(ID_ATTRIBUTE.findall(result)).items() if count > 1])
         self.assertNotIn('label-offset-', result)
+        before = FOREIGN_OBJECT.findall(source)
+        after = FOREIGN_OBJECT.findall(result)
+        self.assertEqual(len(before), len(after), 'Geen foreignObject toevoegen of verliezen.')
+        self.assertEqual(1, sum('height=' not in tag for tag in before))
+        self.assertEqual(0, sum('height=' not in tag for tag in after))
         refs = set(re.findall(r'url\(#([^)]+)\)', result))
         refs |= set(re.findall(r'(?:xlink:)?href="#([^"]+)"', result))
         self.assertEqual(set(), refs - set(ID_ATTRIBUTE.findall(result)))

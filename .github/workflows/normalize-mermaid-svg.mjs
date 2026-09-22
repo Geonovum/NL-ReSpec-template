@@ -18,6 +18,10 @@ const URL_ATTRIBUTES = new Set([
   "fill", "stroke", "filter", "clip-path", "mask", "marker", "marker-start",
   "marker-mid", "marker-end", "cursor", "color-profile",
 ]);
+// Mermaid laat bij sommige cluster-labels het height-attribuut op
+// <foreignObject> weg; vnu eist width én height. 24 is de regelhoogte die
+// mermaid zelf aan eenregelige labels geeft, dus de layout blijft gelijk.
+const FOREIGN_OBJECT_HEIGHT = "24";
 
 function* elements(node) {
   if (node.tagName) yield node;
@@ -108,6 +112,7 @@ function normalize(html) {
   const edits = [];
   let renamed = 0;
   let stripped = 0;
+  let sized = 0;
   const diagrams = nodes.filter(node => {
     if (node.namespaceURI !== SVG || node.tagName !== "svg") return false;
     for (let parent = node.parentNode; parent; parent = parent.parentNode) {
@@ -161,6 +166,19 @@ function normalize(html) {
             value: `${name}="${escapeText(value).replaceAll('"', "&quot;")}"` });
         }
       }
+      // Een ontbrekende height aanvullen in plaats van een attribuut wijzigen:
+      // invoegen vlak voor het sluithaakje van de starttag.
+      if (node.namespaceURI === SVG && node.tagName === "foreignObject" &&
+          !(node.attrs ?? []).some(attribute => attribute.name === "height")) {
+        const location = node.sourceCodeLocation?.startTag;
+        if (location) {
+          const tag = html.slice(location.startOffset, location.endOffset);
+          const offset = location.endOffset - (tag.endsWith("/>") ? 2 : 1);
+          edits.push({ start: offset, end: offset,
+            value: ` height="${FOREIGN_OBJECT_HEIGHT}"` });
+          sized++;
+        }
+      }
       if (node.namespaceURI === SVG && node.tagName === "style") {
         const original = textContent(node);
         const value = rewriteCss(original, "stylesheet", renames);
@@ -174,7 +192,7 @@ function normalize(html) {
   });
   // Alleen gewijzigde attributen en SVG-styles terugschrijven. De overige HTML,
   // tekst, comments, scripts, afbeeldingen en ReSpec-ankers blijven bytegelijk.
-  return { html: applyEdits(html, edits), renamed, stripped, svgCount: diagrams.length };
+  return { html: applyEdits(html, edits), renamed, stripped, sized, svgCount: diagrams.length };
 }
 
 const files = process.argv.slice(2);
@@ -184,8 +202,9 @@ if (files.length === 0) {
 }
 for (const file of files) {
   const original = readFileSync(file, "utf8");
-  const { html, renamed, stripped, svgCount } = normalize(original);
+  const { html, renamed, stripped, sized, svgCount } = normalize(original);
   if (html !== original) writeFileSync(file, html);
   console.log(`${file}: ${svgCount} Mermaid SVG('s), ${renamed} dubbele id('s) herschreven, ` +
-    `${stripped} ongeldig(e) attribu(u)t(en) verwijderd.`);
+    `${stripped} ongeldig(e) attribu(u)t(en) verwijderd, ` +
+    `${sized} ontbrekende foreignObject-height(s) aangevuld.`);
 }
