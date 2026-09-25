@@ -34,12 +34,12 @@
       "Geo-standaarden-wijzigingsprotocol": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "37.0.0"
+        "respecVersion": "37.2.0"
       },
       "raamwerk-geostandaarden": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.8.0"
+        "respecVersion": "37.2.0"
       },
       "ow-IMOW": {
         "updateAllow": true,
@@ -129,7 +129,7 @@
       "ogc-api-features-guideline": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.8.0"
+        "respecVersion": "37.2.0"
       },
       "hvd": {
         "updateAllow": true,
@@ -164,7 +164,7 @@
       "hr-3d-standaarden": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.8.0"
+        "respecVersion": "37.2.0"
       },
       "ibro-scope": {
         "updateAllow": true,
@@ -294,12 +294,12 @@
       "geooptijd": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.4.1"
+        "respecVersion": "37.2.0"
       },
       "KBI-WOZ-advies": {
         "updateAllow": false,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": null
+        "respecVersion": "37.2.0"
       },
       "3d-standaard-rapport": {
         "updateAllow": true,
@@ -308,7 +308,7 @@
       },
       "TransparantieApp": {
         "updateAllow": true,
-        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecBuildUrl": "https://logius-standaarden.github.io/publicatie/respec/builds/respec-nlgov.js",
         "respecVersion": "37.2.0"
       },
       "geen-respec": {
@@ -359,12 +359,12 @@
       "TransparantieApp-Gebruikers-Onderzoek-UX": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "35.8.0"
+        "respecVersion": "37.2.0"
       },
       "TransparantieApp-Applicatie-Architectuur": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
-        "respecVersion": "37.0.0"
+        "respecVersion": "37.2.0"
       },
       "testbed-sensordata-2026": {
         "updateAllow": true,
@@ -407,6 +407,46 @@
         "respecVersion": "37.0.0"
       },
       "IMMOB-english": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "toegankelijke-locatiedata": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "inspire-handreiking": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://tools.geostandaarden.nl/respec/builds/respec-geonovum.js",
+        "respecVersion": "24.5.2"
+      },
+      "NLDT-Architectuur": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "logboek-dataverwerkingen-voor-objecten": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "nen3610-ontologie": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "vth-lith": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "handreiking-rasterdata": {
+        "updateAllow": true,
+        "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
+        "respecVersion": "37.2.0"
+      },
+      "NLDT-Wijzigingsprotocol": {
         "updateAllow": true,
         "respecBuildUrl": "https://gitdocumentatie.logius.nl/publicatie/respec/builds/respec-nlgov.js",
         "respecVersion": "37.2.0"
