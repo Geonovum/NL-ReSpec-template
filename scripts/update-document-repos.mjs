@@ -11,18 +11,22 @@ import {
 } from "./lib/workflow-utils.mjs";
 import { migrateChecksDirectory } from "./lib/repository-migration.mjs";
 
+// Documentrepos bevatten alleen de aanroepende workflows; build en publicatie
+// worden centraal via `uses: ...@v1` uit dit template gebruikt.
 const MANAGED_FILES = [
-  "mermaid-svg/package.json",
-  "mermaid-svg/package-lock.json",
-  "workflows/build.yml",
   "workflows/main.yml",
-  "workflows/normalize-mermaid-svg.mjs",
-  "workflows/pdf.js",
-  "workflows/publish.yml",
   "workflows/visual-regression.yml",
 ];
 
-const REMOVED_MANAGED_FILES = ["dependabot.yml"];
+const REMOVED_MANAGED_FILES = [
+  "dependabot.yml",
+  "mermaid-svg/package.json",
+  "mermaid-svg/package-lock.json",
+  "workflows/build.yml",
+  "workflows/normalize-mermaid-svg.mjs",
+  "workflows/pdf.js",
+  "workflows/publish.yml",
+];
 
 const args = parseArgs(process.argv.slice(2));
 const org = requireArg(args, "org");

@@ -6,6 +6,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  # main.yml gebruikt @v1; hier wordt de build van deze branch zelf getest.
+  build:
+    if: ${{ github.repository == 'Geonovum/NL-ReSpec-template' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build.yml
+
   visual-regression:
     if: ${{ github.repository == 'Geonovum/NL-ReSpec-template' }}
     uses: ./.github/workflows/visual-regression-reusable.yml

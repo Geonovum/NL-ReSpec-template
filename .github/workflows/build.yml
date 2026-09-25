@@ -11,6 +11,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # Hulpbestanden (normalizer, pdf.js) komen uit dezelfde repository en ref
+      # als deze reusable workflow, zodat documentrepos ze niet zelf hoeven te bevatten.
+      - name: Determine tooling ref
+        id: tooling
+        shell: bash
+        env:
+          WORKFLOW_REF: ${{ job.workflow_ref }}
+        run: |
+          set -euo pipefail
+
+          TOOLING_REPOSITORY="${WORKFLOW_REF%%/.github/workflows/*}"
+          TOOLING_REF="${WORKFLOW_REF##*@}"
+
+          if [[ -z "$TOOLING_REPOSITORY" || -z "$TOOLING_REF" ]]; then
+            echo "::error title=Workflow ref ontbreekt::Kan job.workflow_ref niet parsen: $WORKFLOW_REF"
+            exit 1
+          fi
+
+          echo "repository=$TOOLING_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "ref=$TOOLING_REF" >> "$GITHUB_OUTPUT"
+          echo "TOOLING_DIR=$GITHUB_WORKSPACE/.nl-respec-tooling" >> "$GITHUB_ENV"
+          echo "Tooling repository: $TOOLING_REPOSITORY"
+          echo "Tooling ref: $TOOLING_REF"
+
+      - name: Checkout workflow tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.tooling.outputs.repository }}
+          ref: ${{ steps.tooling.outputs.ref }}
+          path: .nl-respec-tooling
+          persist-credentials: false
+          sparse-checkout: |
+            .github/mermaid-svg
+            .github/workflows
+
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -84,12 +119,8 @@ jobs:
       - name: Normaliseer mermaid-diagrammen in snapshot
         run: |
           set -euo pipefail
-          if [ -f .github/workflows/normalize-mermaid-svg.mjs ]; then
-            (cd .github/mermaid-svg && npm ci --ignore-scripts --no-audit --no-fund)
-            node .github/workflows/normalize-mermaid-svg.mjs snapshot.html
-          else
-            echo "::warning title=Normalisatie overgeslagen::.github/workflows/normalize-mermaid-svg.mjs ontbreekt; mermaid-diagrammen zijn niet genormaliseerd."
-          fi
+          (cd "$TOOLING_DIR/.github/mermaid-svg" && npm ci --ignore-scripts --no-audit --no-fund)
+          node "$TOOLING_DIR/.github/workflows/normalize-mermaid-svg.mjs" snapshot.html
 
       - name: Check localized header links
         run: |
@@ -147,7 +178,7 @@ jobs:
 
       - name: Copy pdf.js if needed
         if: ${{ steps.config.outputs.grep == 'true' }}
-        run: cp .github/workflows/pdf.js .
+        run: cp "$TOOLING_DIR/.github/workflows/pdf.js" .
 
       - name: Generate PDF(s)
         if: ${{ steps.config.outputs.grep == 'true' }}
