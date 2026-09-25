@@ -125,9 +125,49 @@ https://docs.geostandaarden.nl/
 
 ---
 
+## Centrale workflows en versies
+
+De build- en publicatiestappen staan alleen in deze template. Een
+documentrepository bevat uitsluitend kleine aanroepende workflows
+(`main.yml` en `visual-regression.yml`) die de centrale workflows gebruiken:
+
+```yaml
+jobs:
+  build:
+    uses: Geonovum/NL-ReSpec-template/.github/workflows/build.yml@v1
+```
+
+Hulpbestanden zoals de Mermaid-normalisatie en `pdf.js` haalt de centrale
+workflow zelf op uit dezelfde versie van deze template. Een fix in de
+template bereikt dus alle documentrepositories zonder dat daar iets hoeft
+te veranderen.
+
+### Versies
+
+* Elke workflowrelease krijgt een vaste tag volgens semver, bijv. `v1.0.1`.
+* De tag `v1` wijst altijd naar de nieuwste `v1.x.y`. De workflow
+  **"Move major version tag"** verplaatst `v1` automatisch zodra een
+  nieuwe `v1.x.y`-tag gepusht wordt.
+* Documentrepositories gebruiken `@v1`: niet-brekende wijzigingen
+  (fixes, nieuwe controles) krijgen ze automatisch.
+* Alleen bij een brekende wijziging (bijv. andere verplichte velden in
+  `config.js` of andere secrets) komt er een `v2`. Dan worden de
+  aanroepende workflows eenmalig uitgerold met de update-workflow hieronder.
+* Terugdraaien: zet `v1` terug naar de vorige `v1.x.y`-tag.
+
+Een nieuwe versie maken (vanaf `main`):
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+Gebruik hiervoor een gewone tag en geen GitHub-release: een release in
+deze repository start ook de publicatieflow van het voorbeelddocument.
+
 ## Workflows updaten in document-repos
 
-De GitHub Actions workflows in alle document-repositories kunnen centraal
+De aanroepende workflows in alle document-repositories kunnen centraal
 bijgewerkt worden vanuit deze template via de workflow
 **"Update workflows in document repos"**.
 
@@ -170,8 +210,15 @@ onaangeraakt.
 
 De volgende bestanden worden bijgewerkt:
 
-* `.github/dependabot.yml`
-* `.github/workflows/build.yml`
 * `.github/workflows/main.yml`
+* `.github/workflows/visual-regression.yml`
+
+De volgende verouderde kopieën worden verwijderd, omdat ze nu centraal
+gebruikt worden:
+
+* `.github/dependabot.yml`
+* `.github/mermaid-svg/package.json` en `package-lock.json`
+* `.github/workflows/build.yml`
+* `.github/workflows/normalize-mermaid-svg.mjs`
 * `.github/workflows/pdf.js`
 * `.github/workflows/publish.yml`

@@ -181,17 +181,15 @@ jobs:
               exit 1
             fi
 
-            npx --yes respec --localhost --disable-sandbox --src "$SOURCE" --out "$SNAPSHOT"
+            npx --yes respec@37.3.2 --localhost --disable-sandbox --timeout 120 --src "$SOURCE" --out "$SNAPSHOT"
 
-            # Gebruik de normalizer van deze checkout, zoals de publicatiebuild.
+            # Gebruik de centrale normalizer, net als de publicatiebuild.
             # Een gecommitte base-snapshot blijft de werkelijk bewaarde baseline.
-            if [[ -f .github/workflows/normalize-mermaid-svg.mjs ]]; then
-              if [[ -f .github/mermaid-svg/package-lock.json ]]; then
-                (cd .github/mermaid-svg && npm ci --ignore-scripts --no-audit --no-fund)
-              fi
-              node .github/workflows/normalize-mermaid-svg.mjs "$SNAPSHOT"
-            fi
+            node "$TOOLING_DIR/.github/workflows/normalize-mermaid-svg.mjs" "$SNAPSHOT"
           }
+
+          TOOLING_DIR="$GITHUB_WORKSPACE/$WORK_DIR/template"
+          (cd "$TOOLING_DIR/.github/mermaid-svg" && npm ci --ignore-scripts --no-audit --no-fund)
 
           if [[ -f "$GITHUB_WORKSPACE/$WORK_DIR/base/$SNAPSHOT" ]]; then
             echo "Using committed base snapshot: $SNAPSHOT"

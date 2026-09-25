@@ -78,12 +78,18 @@ class MermaidSvgNormalizationTest(unittest.TestCase):
             "Normaliseren kan pas nadat ReSpec de snapshot heeft gegenereerd.",
         )
 
-    def test_normalizer_is_distributed_to_document_repositories(self) -> None:
-        self.assertIn(
-            '"workflows/normalize-mermaid-svg.mjs"',
-            UPDATE_SCRIPT.read_text(encoding="utf-8"),
-            "Zonder vermelding in MANAGED_FILES belandt het script niet in de documentrepositories.",
+    def test_normalizer_comes_from_central_tooling_checkout(self) -> None:
+        names = step_names()
+        checkout = next(step for step in build_steps() if step.get("name") == "Checkout workflow tooling")
+
+        self.assertLess(
+            names.index("Checkout workflow tooling"),
+            names.index("Normaliseer mermaid-diagrammen in snapshot"),
+            "De centrale hulpbestanden moeten zijn uitgecheckt voordat er genormaliseerd wordt.",
         )
+        self.assertEqual(checkout["with"]["repository"], "${{ steps.tooling.outputs.repository }}")
+        self.assertEqual(checkout["with"]["ref"], "${{ steps.tooling.outputs.ref }}")
+        self.assertIn(".github/mermaid-svg", checkout["with"]["sparse-checkout"])
 
     def test_duplicate_mermaid_ids_become_unique(self) -> None:
         result = normalize(FIXTURE)
@@ -278,23 +284,24 @@ class MermaidProductionFixtureTest(unittest.TestCase):
         self.assertIn('data:image/svg+xml;base64,', source)
         self.assertEqual(source, normalize(source))
 
-    def test_managed_files_form_a_runnable_normalizer(self):
-        # Kopieer uitsluitend de werkelijk beheerde bestanden naar een lege
-        # documentrepository: ontbrekende manifests/dependencies moeten falen.
-        source = UPDATE_SCRIPT.read_text()
-        managed = re.findall(r'"([^"]+)"', source.split('const MANAGED_FILES = [')[1].split('];')[0])
+    def test_sparse_tooling_checkout_forms_a_runnable_normalizer(self):
+        # Een documentrepository zonder eigen .github-hulpbestanden: alleen de
+        # sparse checkout van het template mag nodig zijn om te normaliseren.
+        checkout = next(step for step in build_steps() if step.get('name') == 'Checkout workflow tooling')
+        sparse_paths = checkout['with']['sparse-checkout'].split()
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            for name in managed:
-                destination = root / '.github' / name
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(REPOSITORY_ROOT / '.github' / name, destination)
+            root = Path(directory) / 'document'
+            tooling = root / '.nl-respec-tooling'
+            root.mkdir()
+            for name in sparse_paths:
+                shutil.copytree(REPOSITORY_ROOT / name, tooling / name,
+                                ignore=shutil.ignore_patterns('node_modules'))
             target = root / 'snapshot.html'
             target.write_text(FIXTURE)
             step = next(step for step in build_steps() if
                         step.get('name') == 'Normaliseer mermaid-diagrammen in snapshot')
             subprocess.run(['bash', '-c', step['run']], cwd=root,
-                           env={**os.environ, 'npm_config_offline': 'true'},
+                           env={**os.environ, 'npm_config_offline': 'true', 'TOOLING_DIR': str(tooling)},
                            check=True, capture_output=True)
             self.assertEqual(normalize(FIXTURE), target.read_text())
 
@@ -310,10 +317,12 @@ class MermaidVisualWorkflowTest(unittest.TestCase):
             base = root / 'comparison/base'
             head.mkdir(parents=True)
             base.mkdir(parents=True)
-            shutil.copytree(REPOSITORY_ROOT / '.github/mermaid-svg', head / '.github/mermaid-svg',
+            # De normalizer komt uit de tooling-checkout, niet uit de documentrepository.
+            template = root / 'comparison/template'
+            shutil.copytree(REPOSITORY_ROOT / '.github/mermaid-svg', template / '.github/mermaid-svg',
                             ignore=shutil.ignore_patterns('node_modules'))
-            (head / '.github/workflows').mkdir(parents=True)
-            shutil.copyfile(NORMALIZER, head / '.github/workflows' / NORMALIZER.name)
+            (template / '.github/workflows').mkdir(parents=True)
+            shutil.copyfile(NORMALIZER, template / '.github/workflows' / NORMALIZER.name)
             (head / 'index.html').write_text(FIXTURE)
             (base / 'snapshot.html').write_text(FIXTURE)
             # Alleen de externe ReSpec-renderer vervangen: de echte shellstap,
