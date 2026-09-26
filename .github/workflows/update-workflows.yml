@@ -12,7 +12,7 @@ jobs:
   # ── Stap 1: repos.json bijhouden ────────────────────────────────────────────
   sync-repos-json:
     name: Sync repos.json
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
@@ -73,7 +73,7 @@ jobs:
   update:
     name: ${{ matrix.org }}
     needs: sync-repos-json
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
