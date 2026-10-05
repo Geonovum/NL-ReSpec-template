@@ -53,7 +53,9 @@ CSS-classes zijn ook bruikbaar in markdown via HTML:
 <div class="example">voorbeeld</div>
 ```
 
-Meer info: [ReSpec documentatie](https://respec.org/docs/#css-classes)
+Meer info:
+* [Geonovum ReSpec handleiding](https://geonovum.github.io/handleiding-tooling/ReSpec/)
+* [ReSpec documentatie](https://respec.org/docs/#css-classes)
 
 ---
 
