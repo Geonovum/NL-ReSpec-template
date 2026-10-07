@@ -125,6 +125,8 @@ git_auth() {
 mkdir -p "$TMP_DIR"
 
 echo "✅ Repositories met js/config.js worden bijgewerkt:"
+0
+# TODO js/config.mjs 
 
 while true; do
   ensure_token

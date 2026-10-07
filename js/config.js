@@ -1,7 +1,5 @@
+// keep for now as workflow depends on it
 let respecConfig = {
-  useLogo: true,
-  useLabel: true,
-
   // TODO: title is verplicht! Neem hieronder de titel van het document op
   title: "Geonovum template voor ReSpec",
   //-- specStatus is verplicht! (activeer 1 van de volgende)
@@ -10,6 +8,8 @@ let respecConfig = {
   //specStatus: "vv",               // Versie ter vaststelling
   //specStatus: "def",              // Vastgestelde versie
   specStatus: "basis",            // Basis Document
+  //specStatus: "eo",               // "Verouderde versie",
+  //specStatus: "tg",               // "Teruggetrokken versie",
 
   //-- specType is verplicht bij alle andere dan BASIS
   //specType: "NO",                 // Norm
@@ -33,13 +33,13 @@ let respecConfig = {
   license: "cc-by",                 // Attribution, met bronvermelding
 
   //-- TODO shortName is verplicht! (komt in de URL: kies logische afkorting)
-  //-- Regel: shortName mag geen hoofdletters bevatten.
+  //-- Regel: shortName mag geen hoofdletters (wordt lowercase) en spaties bevatten.
   shortName: "nl-respec-template",
   
   //edDraftURI = De URI van de draft version. Deze wordt automatisch afgeleid van de github URI; maar kan hier overschreven worden. 
 	//edDraftURI: ["https://geonovum.github.io", "/", "shortName"],
 
-  //-- publishDate is verplicht. Als je werkversie gekozen hebt  dan pakt Respec
+  //-- publishDate is verplicht. Als je werkversie gekozen hebt dan pakt Respec
   //-- de pushdate maar de publishDate is nog steeds verplicht.
   publishDate: "2026-02-09",
   
@@ -80,10 +80,8 @@ let respecConfig = {
   // dit zorgt voor het 'Doe mee:' onderdeel in het voorblad van de publicatie.
   github: "https://github.com/Geonovum/NL-ReSpec-template",
 
-  postProcess: [
-    ...(organisationConfig.postProcess ?? []),
-    localizeGitHubHeaderLinks
-  ],
+  // custom postprocessing
+  // postProcess: [ ],
 
   // Create PDF and link to file in header (optional):
   // TODO: Change the filename as preferred.
@@ -114,6 +112,7 @@ let respecConfig = {
   }
 };
 
+// temporary?
 function localizeGitHubHeaderLinks(_config, document) {
   if (document.documentElement.lang !== "nl") {
     return;

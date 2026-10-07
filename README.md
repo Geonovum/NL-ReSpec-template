@@ -67,7 +67,7 @@ Meer info: [ReSpec documentatie](https://respec.org/docs/#css-classes)
 De GitHub Actions workflow draait automatisch bij iedere commit of bij een GitHub Release. Daarbij gebeuren de volgende stappen:
 
 1. HTML wordt gegenereerd met [ReSpec](https://respec.org/)
-2. (optioneel) PDF wordt gegenereerd — indien `alternateFormats` is ingesteld in `config.js`:
+2. (optioneel) PDF wordt gegenereerd — indien `alternateFormats` is ingesteld in `config.mjs`:
 
 ```js
 alternateFormats: [
@@ -157,6 +157,12 @@ aparte PR om dit bestand te verplaatsen naar `js/config.js` en meteen de
 beheerde `.github`-bestanden uit deze template mee te nemen. Zo'n repo
 wordt pas bij een volgende run automatisch aan `repos.json` toegevoegd,
 nadat de migratie-PR is gemerged.
+
+#### TODO overgang naar js/config.mjs
+
+Met de nieuwe template systematiek zullen ook bestaande repos overgaan. Hiervoor 
+dienen ze eerst te voldoen aan de systematiek en structuur zonder verwijzingen 
+naar tools, behouden geonovum-config.mjs.
 
 ### Handmatig triggeren
 

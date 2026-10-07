@@ -1,9 +1,8 @@
 import { loadRespecWithConfiguration } from "https://tools.geostandaarden.nl/respec/config/geonovum-config.mjs";
-//import { loadRespecWithConfiguration } from "./geonovum-config.mjs";
 
 let respecConfig = {
-  useLogo: true,    // Default true
-  useLabel: true,   // Default true
+  //useLogo: true,    // Default true
+  //useLabel: true,   // Default true
 
   // TODO: title is verplicht! Neem hieronder de titel van het document op
   title: "Geonovum template voor ReSpec",
@@ -13,8 +12,12 @@ let respecConfig = {
   //specStatus: "vv",               // Versie ter vaststelling
   //specStatus: "def",              // Vastgestelde versie
   specStatus: "basis",              // Basis Document
+  //specStatus: "eo",               // "Verouderde versie",
+  //specStatus: "tg",               // "Teruggetrokken versie",
 
-  //-- specType is verplicht bij alle andere dan BASIS
+    ld: "#80CC28",
+
+  //-- specType is verplicht bij alle andere dan basis
   //specType: "NO",                 // Norm
   //specType: "ST",                 // Standaard
   //specType: "IM",                 // Informatie Model
@@ -36,7 +39,7 @@ let respecConfig = {
   license: "cc-by",                 // Attribution, met bronvermelding
 
   //-- TODO shortName is verplicht! (komt in de URL: kies logische afkorting)
-  //-- Regel: shortName mag geen hoofdletters bevatten.
+  //-- Regel: shortName mag geen hoofdletters (wordt lowercase) en spaties bevatten.
   shortName: "nl-respec-template",
   
   //edDraftURI = De URI van de draft version. Deze wordt automatisch afgeleid van de github URI; maar kan hier overschreven worden. 
@@ -82,6 +85,9 @@ let respecConfig = {
   //neem hier de URL van de github repository op waar het respec document in staat
   github: "https://github.com/Geonovum/NL-ReSpec-template",
 
+  // custom postprocessing
+  // postProcess: [ ],
+  
   // Create PDF and link to file in header (optional):
   // TODO: Change the filename as preferred.
   //alternateFormats: [
@@ -111,4 +117,5 @@ let respecConfig = {
   }
 };
 
+// 'callback' geonovum-config.mjs
 loadRespecWithConfiguration(respecConfig);
