@@ -12,9 +12,9 @@
   <script src="js/config.js" class="remove"></script>
   <!-- TODO: Vul in config.js de titel in -->
   <script class="remove">
-    const mergedLocalBiblio = {...organisationConfig.localBiblio, ...documentConfig.localBiblio};
-    const mergedPostProcess = [...(organisationConfig.postProcess ?? []),...(documentConfig.postProcess ?? [])];
-    respecConfig = {...organisationConfig, ...documentConfig, 
+    const mergedLocalBiblio = {...organisationConfig.localBiblio, ...respecConfig.localBiblio};
+    const mergedPostProcess = [...(organisationConfig.postProcess ?? []),...(respecConfig.postProcess ?? [])];
+    respecConfig = {...organisationConfig, ...respecConfig, 
       postProcess: mergedPostProcess, 
       localBiblio: mergedLocalBiblio};
     document.title = respecConfig.title;
