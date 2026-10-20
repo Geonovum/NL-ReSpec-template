@@ -10,13 +10,18 @@ De dynamische voorbeeldpagina van het template is [hier te bekijken](https://geo
 
 Gebruik de knop [*Gebruik deze template*](https://github.com/Geonovum/NL-ReSpec-template/generate?description=Geonovum+documenttemplate) om een nieuwe repository aan te maken:
 
-* **Owner:** kies `Geonovum` als je daar rechten voor hebt.
+* **Owner:** kies `Geonovum` (als je daar rechten voor hebt).
 * **Visibility:** kies **Public**.
+* **Rechten?** welke rechten heb je hiervoor nodig? Lukt het niet vraag een [admin](#nieuwe-repository-toevoegen-aan-github-team)
 
 > ℹ️ Na het aanmaken moet je **handmatig GitHub Pages activeren** in de instellingen van je nieuwe repository:
 >
 > * Ga naar `Settings` → `Pages`
 > * Kies onder “Source” de branch `main` en map `/ (root)`
+
+### Nieuwe repository toevoegen aan GitHub-team
+
+Vraag aan een GitHub-administrator (Zie [**handleiding tooling**](https://geonovum.github.io/handleiding-tooling/) -> *wie beheert wat?*) om de nieuwe repository aan een team in GitHub toe te voegen.
 
 ---
 
