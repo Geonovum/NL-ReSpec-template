@@ -1,8 +1,10 @@
+> ℹ️ Na het gebruiken van de instructies kun je de inhoud vervangen door informatie over de inhoud. De oorspronkelijke inhoud van de readme is terug te lezen bij het [ReSpec-template](https://github.com/Geonovum/NL-ReSpec-template).
+
 ## ReSpec template instructies
 
 ReSpec is een tool om HTML- en PDF-documenten te genereren op basis van markdowncontent. Deze template helpt je bij het opstellen en publiceren van documenten volgens de Geonovum-standaard.
 
-De dynamische voorbeeldpagina van het template is [hier te bekijken](https://geonovum.github.io/NL-ReSpec-GN-template/).
+De dynamische voorbeeldpagina van het template is [hier te bekijken](https://geonovum.github.io/NL-ReSpec-template/).
 
 ---
 
@@ -18,6 +20,7 @@ Gebruik de knop [*Gebruik deze template*](https://github.com/Geonovum/NL-ReSpec-
 >
 > * Ga naar `Settings` → `Pages`
 > * Kies onder “Source” de branch `main` en map `/ (root)`
+> * _optioneel_ kun je via cog-wieltje "Use your GitHub Pages website" aanvinken zodat deze rechtsboven getoond wordt.
 
 ### Nieuwe repository toevoegen aan GitHub-team
 
