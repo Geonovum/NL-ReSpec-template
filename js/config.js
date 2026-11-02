@@ -9,6 +9,7 @@ let respecConfig = {
   //specStatus: "cv",               // Consultatieversie
   //specStatus: "vv",               // Versie ter vaststelling
   //specStatus: "def",              // Vastgestelde versie
+  //specStatus: "ld",               // Levend document
   specStatus: "basis",            // Basis Document
 
   //-- specType is verplicht!
