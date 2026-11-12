@@ -88,7 +88,7 @@ let respecConfig = {
   alternateFormats: [
     {
       label: "pdf",
-      uri: "data/template.pdf",
+      uri: "static/template.pdf",
     },
   ],
 
