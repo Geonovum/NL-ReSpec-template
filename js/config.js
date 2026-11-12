@@ -85,12 +85,12 @@ let respecConfig = {
  
   // Create PDF and link to file in header (optional):
   // TODO: Change the filename as preferred.
-  //alternateFormats: [
-  //    {
-  //        label: "pdf",
-  //        uri: "static/template.pdf",
-  //    },
-  //],
+  alternateFormats: [
+    {
+      label: "pdf",
+      uri: "static/template.pdf",
+    },
+  ],
 
   //
   // Lokale lijst voor bibliografie
