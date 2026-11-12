@@ -87,8 +87,7 @@ let respecConfig = {
   // TODO: Change the filename as preferred.
   alternateFormats: [
     {
-      label: "pdf",
-      uri: "static/template.pdf",
+      label: "pdf" //, uri: "data/template.pdf",
     },
   ],
 
