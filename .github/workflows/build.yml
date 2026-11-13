@@ -236,6 +236,8 @@ jobs:
         with:
           args: >-
             # --offline
+            --exclude 'static\\template\.pdf$'
+            --exclude '^https?://docs\.geostandaarden\.nl'
             --root-dir "${{ github.workspace }}/publication-validation"
             './**/*.html'
           fail: true
