@@ -113,7 +113,7 @@ jobs:
           check_external_hash: false
           enforce_https: false
           ignore_empty_alt: true
-          validator_ignore: "internally linking to static/template.pdf, which does not exist"
+          validator_ignore: ".*internally linking to static/template.pdf, which does not exist.*"
 
       - name: Check for alternateFormats via Node
         id: config
@@ -239,7 +239,6 @@ jobs:
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: >-
-            # --offline
             --exclude 'static\\template\.pdf$'
             --exclude '^https?://docs\.geostandaarden\.nl'
             --root-dir "${{ github.workspace }}/publication-validation"
