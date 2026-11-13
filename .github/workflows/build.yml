@@ -46,9 +46,29 @@ jobs:
           echo "should_commit=true" >> "$GITHUB_OUTPUT"
           echo "target_branch=$TARGET_BRANCH" >> "$GITHUB_OUTPUT"
 
+      - name: Check for alternateFormats via Node
+        id: config
+        run: |
+          # Maak config require-baar
+          cp ./js/config.js config.js
+          echo "module.exports = { respecConfig };" >> config.js
+
+          # Laat Node bepalen of er een PDF entry is (en exitcode gebruiken)
+          if node -e "const {respecConfig}=require('./config.js');
+            const ok = Array.isArray(respecConfig.alternateFormats)
+            && respecConfig.alternateFormats.some(f => f && f.label==='pdf' && f.uri);
+            if (!ok) process.exit(1);" ; then
+            uri=$(node -e "const {respecConfig}=require('./config.js'); console.log(((respecConfig.alternateFormats||[]).find((f) => f.label==='pdf' && f.uri)|| {uri:null}).uri);") 
+            echo "pdf_uri=$uri" >> $GITHUB_OUTPUT
+            echo "pdf=true" >> $GITHUB_OUTPUT
+          else
+            echo "pdf=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Prepare directories
         run: |
-          mkdir -p static "$RUNNER_TEMP/nl-respec-validation"
+          echo "${${{ steps.config.outputs.pdf_uri }}%/*}"
+          mkdir -p "${${{ steps.config.outputs.pdf_uri }}%/*}" "$RUNNER_TEMP/nl-respec-validation"
 
       - name: Blokkeer raw.githubusercontent.com-links in bronbestand
         shell: bash
@@ -112,34 +132,15 @@ jobs:
           disable_external: true
           check_external_hash: false
           enforce_https: false
-          ignore_url: static/template.pdf
+          ignore_url: ${{ steps.config.outputs.pdf_uri }}
           ignore_empty_alt: true
 
-      - name: Check for alternateFormats via Node
-        id: config
-        run: |
-          # Maak config require-baar
-          cp ./js/config.js config.js
-          echo "module.exports = { respecConfig };" >> config.js
-
-          # Laat Node bepalen of er een PDF entry is (en exitcode gebruiken)
-          if node -e "const {respecConfig}=require('./config.js');
-            const ok = Array.isArray(respecConfig.alternateFormats)
-            && respecConfig.alternateFormats.some(f => f && f.label==='pdf' && f.uri);
-            if (!ok) process.exit(1);" ; then
-            uri=$(node -e "const {respecConfig}=require('./config.js'); console.log(((respecConfig.alternateFormats||[]).find((f) => f.label==='pdf' && f.uri)|| {uri:null}).uri);") 
-            echo "pdf_uri=$uri" >> $GITHUB_OUTPUT
-            echo "grep=true" >> $GITHUB_OUTPUT
-          else
-            echo "grep=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Copy pdf.js if needed
-        if: ${{ steps.config.outputs.grep == 'true' }}
+        if: ${{ steps.config.outputs.pdf == 'true' }}
         run: cp .github/workflows/pdf.js .
 
       - name: Generate PDF(s)
-        if: ${{ steps.config.outputs.grep == 'true' }}
+        if: ${{ steps.config.outputs.pdf == 'true' }}
         run: |
           cp ./js/config.js config.js
           echo "module.exports = { respecConfig };" >> config.js
@@ -241,7 +242,7 @@ jobs:
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: >-
-            --exclude 'static/template\.pdf$'
+            --exclude '${{ steps.config.outputs.pdf_uri }}$'
             --exclude '^http://localhost:3000/media/'
             --exclude '^https?://docs\.geostandaarden\.nl'
             --root-dir "${{ github.workspace }}/publication-validation"
@@ -295,7 +296,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls ${{ steps.config.outputs.pdf_uri }} 1>/dev/null 2>&1; then
+          if [[ "${{ steps.config.outputs.pdf }}" == "true" ]] && ls ${{ steps.config.outputs.pdf_uri }} 1>/dev/null 2>&1; then
             cp ${{ steps.config.outputs.pdf_uri }} .
             echo ${{ steps.config.outputs.pdf_uri }}
           fi
@@ -323,7 +324,7 @@ jobs:
           name: snapshot
           path: |
             snapshot.html
-            static/*.pdf
+            ${{ steps.config.outputs.pdf_uri }}
             media/**/*
             js/**/*
             data/**/*
