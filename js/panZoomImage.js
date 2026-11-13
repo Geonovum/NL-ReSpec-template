@@ -14,12 +14,12 @@ window.onload = (event) => {
 	}
 	else {
 		console.log("NO panZoomImg");
-		if (document.respec) {		
-			document.respec.ready.then(function () {
-				console.log("panZoomImg ready 2");
-				panZoomImg();	
-			});
-		}
+		// if (document.respec) {		
+		// 	document.respec.ready.then(function () {
+		// 		console.log("panZoomImg ready 2");
+		// 		panZoomImg();	
+		// 	});
+		// }
 	}
 };
 

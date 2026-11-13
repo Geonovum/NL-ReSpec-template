@@ -245,7 +245,6 @@ jobs:
         with:
           args: >-
             --exclude '${{ steps.config.outputs.pdf_uri }}$'
-            --exclude '^http://localhost:3000/media/'
             --exclude '^https?://docs\.geostandaarden\.nl'
             --root-dir "${{ github.workspace }}/publication-validation"
             './**/*.html'
@@ -323,7 +322,7 @@ jobs:
       - name: Upload snapshot artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: snapshot
+          name: snapshot-items
           path: |
             snapshot.html
             ${{ steps.config.outputs.pdf_uri }}
