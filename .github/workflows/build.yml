@@ -127,7 +127,7 @@ jobs:
             const ok = Array.isArray(respecConfig.alternateFormats)
             && respecConfig.alternateFormats.some(f => f && f.label==='pdf' && f.uri);
             if (!ok) process.exit(1);" ; then
-            uri=$(node -e "const {respecConfig}=require('./config.js'); return ((respecConfig.alternateFormats||[]).find((f) => f.label==='pdf' && f.uri)|| {uri:null}).uri;") 
+            uri=$(node -e "const {respecConfig}=require('./config.js'); console.log(((respecConfig.alternateFormats||[]).find((f) => f.label==='pdf' && f.uri)|| {uri:null}).uri);") 
             echo "pdf_uri=$uri" >> $GITHUB_OUTPUT
             echo "grep=true" >> $GITHUB_OUTPUT
           else
