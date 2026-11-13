@@ -1,20 +1,26 @@
 window.onload = (event) => {
     console.log("fully loaded");
-//if (typeof respecConfig == 'undefined' || respecConfig.specStatus == 'WV' || respecConfig.specStatus == 'wv') {
-    if (document.respec) {		
-        document.respec.ready.then(function () {
-            console.log("panZoomImg 1");
-            panZoomImg();	
-        });
-    }
-    else {
-        console.log("panZoomImg 2");
-        panZoomImg();
-    }
-//}
-//else {
-//    console.log("panZoomImg 3");
-//}
+	if (typeof respecConfig == 'undefined' || respecConfig.specStatus == 'WV' || respecConfig.specStatus == 'wv') {
+		if (document.respec) {		
+			document.respec.ready.then(function () {
+				console.log("panZoomImg ready");
+				panZoomImg();	
+			});
+		}
+		else {
+			console.log("panZoomImg ",  respecConfig=='undefined');
+			panZoomImg();
+		}
+	}
+	else {
+		console.log("NO panZoomImg");
+		if (document.respec) {		
+			document.respec.ready.then(function () {
+				console.log("panZoomImg ready 2");
+				panZoomImg();	
+			});
+		}
+	}
 };
 
 //window.onload();
