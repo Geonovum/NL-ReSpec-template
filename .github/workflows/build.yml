@@ -154,12 +154,10 @@ jobs:
             sleep 1
           done
           curl -sf http://localhost:8081/snapshot.html > /dev/null || (echo "Local HTTP server on 8081 not reachable"; exit 1)
-          ls *.pdf
-          ls static/*pdf
           rm -f *.pdf
           PDF_SNAPSHOT_URL=http://localhost:8081/snapshot.html node pdf.js
-          ls static/*.pdf
-          echo ${{ steps.config.outputs.pdf_uri }}
+          echo $PDF_SNAPSHOT_URL
+          echo "pdf_uri=${{ steps.config.outputs.pdf_uri }}"
           # mv *.pdf ${{ steps.config.outputs.pdf_uri }}
 
 
