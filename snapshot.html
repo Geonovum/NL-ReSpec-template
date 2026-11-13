@@ -57,6 +57,24 @@ dfn{cursor:pointer}
       cursor: zoom-in;
       transform: scale(1);
     }
+    a.clickable {
+      border-bottom: none;
+    }
+    
+    @media print {    
+      .leaflet-control-container, .leaflet-control-container * {
+        display: none !important;
+      }
+      .leaflet-container {
+        border: none;
+      }
+      a.clickable {
+        pointer-events: none;
+        cursor: default;
+        text-decoration: none; /* Optional: removes underlines in print */
+        color: inherit;         /* Optional: keeps text color normal */
+      }
+    }
   
 </style>
 
@@ -1832,10 +1850,10 @@ Dit hoofdstuk is toegevoegd met <code>class="informative"</code> in <code>index.
   <figcaption><a class="self-link" href="#fig-magnify">Figuur <bdi class="figno">3</bdi></a> <span class="fig-title">Bomos levenscyclus</span></figcaption>
 </figure></section></section><section id="clickable-image"><div class="header-wrapper"><h4 id="x2-2-4-clickable-image"><bdi class="secno">2.2.4 </bdi>clickable image</h4><a class="self-link" href="#clickable-image" aria-label="Permalink for Section 2.2.4"></a></div>
 <section id="img-svg-0"><div class="header-wrapper"><h5 id="x2-2-4-1-img-svg"><bdi class="secno">2.2.4.1 </bdi>img svg</h5><a class="self-link" href="#img-svg-0" aria-label="Permalink for Section 2.2.4.1"></a></div>
-<p><a href="media/Bomos_levenscyclus.svg" target="_blank" role="button" aria-label="Open window" aria-disabled="false" style="border-bottom: none;"><img src="media/Bomos_levenscyclus.svg" alt="alt Bomos levenscyclus"></a></p>
+<p><a href="media/Bomos_levenscyclus.svg" target="_blank" role="button" aria-label="Open window" aria-disabled="false" class="clickable"><img src="media/Bomos_levenscyclus.svg" alt="alt Bomos levenscyclus"></a></p>
 </section><section id="img-svg-met-figure-caption-0"><div class="header-wrapper"><h5 id="x2-2-4-2-img-svg-met-figure-caption"><bdi class="secno">2.2.4.2 </bdi>img svg met figure/caption</h5><a class="self-link" href="#img-svg-met-figure-caption-0" aria-label="Permalink for Section 2.2.4.2"></a></div>
 <figure id="fig-clickable">
-  <a href="media/Bomos_levenscyclus.svg" target="_blank" role="button" aria-label="Open window" aria-disabled="false" style="border-bottom: none;"><img src="media/Bomos_levenscyclus.svg" alt="alt Bomos levenscyclus"></a>
+  <a href="media/Bomos_levenscyclus.svg" target="_blank" role="button" aria-label="Open window" aria-disabled="false" class="clickable"><img src="media/Bomos_levenscyclus.svg" alt="alt Bomos levenscyclus"></a>
   <figcaption><a class="self-link" href="#fig-clickable">Figuur <bdi class="figno">4</bdi></a> <span class="fig-title">Bomos levenscyclus</span></figcaption>
 </figure><section id="level5"><div class="header-wrapper"><h6 id="x2-2-4-2-1-level5"><bdi class="secno">2.2.4.2.1 </bdi>level5</h6><a class="self-link" href="#level5" aria-label="Permalink for Section 2.2.4.2.1"></a></div>
 </section><section id="level6"><div class="header-wrapper"><h6 id="x2-2-4-2-2-level6"><bdi class="secno">2.2.4.2.2 </bdi>level6</h6><a class="self-link" href="#level6" aria-label="Permalink for Section 2.2.4.2.2"></a></div>
