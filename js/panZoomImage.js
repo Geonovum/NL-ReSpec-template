@@ -8,7 +8,7 @@ window.onload = (event) => {
 			});
 		}
 		else {
-			console.log("panZoomImg ",  respecConfig=='undefined');
+			console.log("panZoomImg ", typeof respecConfig=='undefined');
 			panZoomImg();
 		}
 	}
