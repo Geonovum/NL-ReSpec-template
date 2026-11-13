@@ -67,8 +67,10 @@ jobs:
 
       - name: Prepare directories
         run: |
-          echo "${${{ steps.config.outputs.pdf_uri }}%/*}"
-          mkdir -p "${${{ steps.config.outputs.pdf_uri }}%/*}" "$RUNNER_TEMP/nl-respec-validation"
+          pdf_uri="${{ steps.config.outputs.pdf_uri }}"
+          echo $pdf_uri
+          echo "${pdf_uri%/*}"
+          mkdir -p "${pdf_uri%/*}" "$RUNNER_TEMP/nl-respec-validation"
 
       - name: Blokkeer raw.githubusercontent.com-links in bronbestand
         shell: bash
