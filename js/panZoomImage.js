@@ -1,6 +1,6 @@
 window.onload = (event) => {
     console.log("fully loaded");
-	if (typeof respecConfig == 'undefined' || respecConfig.specStatus == 'WV' || respecConfig.specStatus == 'wv') {
+	if (typeof respecConfig == 'undefined' || ['basis', 'ld', 'wv'].includes(respecConfig.specStatus)) {
 		if (document.respec) {		
 			document.respec.ready.then(function () {
 				console.log("panZoomImg ready");
@@ -14,17 +14,8 @@ window.onload = (event) => {
 	}
 	else {
 		console.log("NO panZoomImg");
-		// if (document.respec) {		
-		// 	document.respec.ready.then(function () {
-		// 		console.log("panZoomImg ready 2");
-		// 		panZoomImg();	
-		// 	});
-		// }
 	}
 };
-
-//window.onload();
-
 
 function panZoomImg() {
 	oImgInfo = document.getElementsByClassName('imageinfo');
