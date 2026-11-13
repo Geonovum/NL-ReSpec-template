@@ -127,7 +127,8 @@ jobs:
             const ok = Array.isArray(respecConfig.alternateFormats)
               && respecConfig.alternateFormats.some(f => f && f.label==='pdf' && f.uri);
           if (!ok) process.exit(1);" ; then
-            #const uri = respecConfig.alternateFormats.some(f => f && f.label==='pdf' && f.uri);
+            const uri = respecConfig.alternateFormats.find(f => f && f.label==='pdf' && f.uri).uri;
+            echo "pdf_uri=$uri" >> $GITHUB_OUTPUT
             echo "grep=true" >> $GITHUB_OUTPUT
           else
             echo "grep=false" >> $GITHUB_OUTPUT
@@ -155,7 +156,8 @@ jobs:
           curl -sf http://localhost:8081/snapshot.html > /dev/null || (echo "Local HTTP server on 8081 not reachable"; exit 1)
           rm -f *.pdf
           PDF_SNAPSHOT_URL=http://localhost:8081/snapshot.html node pdf.js
-          mv *.pdf static/
+          mv *.pdf ${{ steps.config.outputs.pdf_uri }}
+
 
       - name: Serve snapshot over HTTP
         run: |
