@@ -24,6 +24,24 @@
       cursor: zoom-in;
       transform: scale(1);
     }
+    a.clickable {
+      border-bottom: none;
+    }
+    
+    @media print {    
+      .leaflet-control-container, .leaflet-control-container * {
+        display: none !important;
+      }
+      .leaflet-container {
+        border: none;
+      }
+      a.clickable {
+        pointer-events: none;
+        cursor: default;
+        text-decoration: none; /* Optional: removes underlines in print */
+        color: inherit;         /* Optional: keeps text color normal */
+      }
+    }
   </style>
 
   <!-- color-scheme logius template verwacht https://tools.geostandaarden.nl/respec/style/dark.css -->
