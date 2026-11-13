@@ -154,9 +154,13 @@ jobs:
             sleep 1
           done
           curl -sf http://localhost:8081/snapshot.html > /dev/null || (echo "Local HTTP server on 8081 not reachable"; exit 1)
+          ls *.pdf
+          ls static/*pdf
           rm -f *.pdf
           PDF_SNAPSHOT_URL=http://localhost:8081/snapshot.html node pdf.js
-          mv *.pdf ${{ steps.config.outputs.pdf_uri }}
+          ls static/*.pdf
+          echo ${{ steps.config.outputs.pdf_uri }}
+          # mv *.pdf ${{ steps.config.outputs.pdf_uri }}
 
 
       - name: Serve snapshot over HTTP
@@ -292,14 +296,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls static/*.pdf 1>/dev/null 2>&1; then
-            mv static/*.pdf .
+          if [[ "${{ steps.config.outputs.grep }}" == "true" ]] && ls ${{ steps.config.outputs.pdf_uri }} 1>/dev/null 2>&1; then
+            cp ${{ steps.config.outputs.pdf_uri }} .
+            echo ${{ steps.config.outputs.pdf_uri }}
           fi
 
           git add snapshot.html
 
           if compgen -G "*.pdf" > /dev/null; then
             git add *.pdf
+            #git add ${{ steps.config.outputs.pdf_uri }}
           fi
 
           if git diff --cached --quiet; then
