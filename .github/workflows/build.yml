@@ -112,6 +112,7 @@ jobs:
           disable_external: true
           check_external_hash: false
           enforce_https: false
+          ignore_url: static/template.pdf
           ignore_empty_alt: true
           validator_ignore: ".*internally linking to static/template.pdf, which does not exist.*"
 
