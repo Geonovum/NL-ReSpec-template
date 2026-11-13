@@ -35,6 +35,8 @@ if (alternateFormats === undefined) {
       });
 
       await browser.close();
+      
+      console.log(name);
     })();
   }
 }
