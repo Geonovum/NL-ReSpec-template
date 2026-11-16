@@ -26,6 +26,7 @@
     }
     a.clickable {
       border-bottom: none;
+      text-decoration: none;
     }
     
     @media print {    
@@ -33,13 +34,13 @@
         display: none !important;
       }
       .leaflet-container {
-        border: none;
+        border: none !important;
       }
       a.clickable {
-        pointer-events: none;
-        cursor: none;
-        text-decoration: none; /* Optional: removes underlines in print */
-        color: inherit;         /* Optional: keeps text color normal */
+        pointer-events: none !important;
+        cursor: none !important;
+        border: none !important;
+        text-decoration: none;
       }
     }
   </style>
