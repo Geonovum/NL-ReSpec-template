@@ -5,12 +5,11 @@ let respecConfig = {
   // TODO: title is verplicht! Neem hieronder de titel van het document op
   title: "Geonovum template voor ReSpec",
   //-- specStatus is verplicht! (activeer 1 van de volgende)
-  // specStatus: "wv",                 // Werkversie
+  specStatus: "wv",                 // Werkversie
   //specStatus: "cv",               // Consultatieversie
   //specStatus: "vv",               // Versie ter vaststelling
   //specStatus: "def",              // Vastgestelde versie
   //specStatus: "ld",               // Levend document
-  specStatus: "basis",            // Basis Document
 
   //-- specType is verplicht!
   //specType: "NO",                 // Norm
