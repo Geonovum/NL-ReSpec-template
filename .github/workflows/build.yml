@@ -298,16 +298,17 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           if [[ "${{ steps.config.outputs.pdf }}" == "true" ]] && ls ${{ steps.config.outputs.pdf_uri }} 1>/dev/null 2>&1; then
-            cp ${{ steps.config.outputs.pdf_uri }} .
-            echo ${{ steps.config.outputs.pdf_uri }}
+            #cp ${{ steps.config.outputs.pdf_uri }} .
+            git add ${{ steps.config.outputs.pdf_uri }}
           fi
 
           git add snapshot.html
 
-          if compgen -G "*.pdf" > /dev/null; then
-            git add *.pdf
+          #pdf in config path, not root
+          #if compgen -G "*.pdf" > /dev/null; then
+            #git add *.pdf
             #git add ${{ steps.config.outputs.pdf_uri }}
-          fi
+          #fi
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
