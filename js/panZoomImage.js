@@ -1,6 +1,6 @@
 window.onload = (event) => {
     console.log("fully loaded");
-	if (typeof respecConfig == 'undefined' || ['basis', 'ld', 'wv'].includes(respecConfig.specStatus)) {
+	if (typeof respecConfig == 'undefined' || ['ld', 'wv'].includes(respecConfig.specStatus)) {
 		if (document.respec) {		
 			document.respec.ready.then(function () {
 				console.log("panZoomImg ready");
