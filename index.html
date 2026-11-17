@@ -36,7 +36,8 @@
       .leaflet-container {
         border: none !important;
       }
-      a.clickable {
+      a.clickable,
+      a.clickable img {
         pointer-events: none !important;
         cursor: none !important;
         border: none !important;
@@ -44,6 +45,9 @@
       }
       .imageinfo figure {
         margin: 0;
+      }
+      img {
+        page-break-inside: avoid  !important;
       }
     }
   </style>
