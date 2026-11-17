@@ -24,9 +24,10 @@
       cursor: zoom-in;
       transform: scale(1);
     }
-    a.clickable {
-      border-bottom: none;
-      text-decoration: none;
+    a.clickable,
+    a.clickable img {
+      border: none !important;
+      text-decoration: none !important;
     }
     
     @media print {    
@@ -40,14 +41,16 @@
       a.clickable img {
         pointer-events: none !important;
         cursor: none !important;
-        border: none !important;
-        text-decoration: none !important;
       }
       .imageinfo figure {
         margin: 0;
       }
       img {
-        page-break-inside: avoid  !important;
+        page-break-inside: avoid !important;
+      }
+      .rotate-left {
+        size: landscape;
+        page-orientation: rotate-left;
       }
     }
   </style>
