@@ -27,6 +27,11 @@ if (alternateFormats === undefined) {
       await page.goto(website_url, { waitUntil: "networkidle0" });
       await page.emulateMediaType("print");
       await page.addStyleTag({ content: ".sidelabel {position: absolute}" });
+      await page.evaluate(() => {
+        document.querySelectorAll('a[href].clickable').forEach((anchor) => {
+          anchor.removeAttribute('href');
+        });
+      });
       const pdf = await page.pdf({
         path: name,
         margin: { top: "100px", right: "50px", bottom: "100px", left: "50px" },
