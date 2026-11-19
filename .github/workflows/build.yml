@@ -11,6 +11,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # Hulpbestanden (normalizer, pdf.js, gedeelde controles) komen uit dezelfde
+      # repository en commit als deze reusable workflow, zodat documentrepos ze niet
+      # zelf hoeven te bevatten en workflow en hulpbestanden altijd bij elkaar passen.
+      - name: Determine tooling ref
+        id: tooling
+        shell: bash
+        env:
+          WORKFLOW_REF: ${{ job.workflow_ref }}
+          WORKFLOW_REPOSITORY: ${{ job.workflow_repository }}
+          WORKFLOW_SHA: ${{ job.workflow_sha }}
+        run: |
+          set -euo pipefail
+
+          TOOLING_REPOSITORY="${WORKFLOW_REPOSITORY:-${WORKFLOW_REF%%/.github/workflows/*}}"
+          TOOLING_REF="${WORKFLOW_SHA:-${WORKFLOW_REF##*@}}"
+
+          if [[ -z "$TOOLING_REPOSITORY" || -z "$TOOLING_REF" ]]; then
+            echo "::error title=Workflow ref ontbreekt::Kan job.workflow_ref niet parsen: $WORKFLOW_REF"
+            exit 1
+          fi
+
+          echo "repository=$TOOLING_REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "ref=$TOOLING_REF" >> "$GITHUB_OUTPUT"
+          echo "TOOLING_DIR=$GITHUB_WORKSPACE/.nl-respec-tooling" >> "$GITHUB_ENV"
+          echo "Tooling repository: $TOOLING_REPOSITORY"
+          echo "Tooling ref: $TOOLING_REF"
+
+      - name: Checkout workflow tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.tooling.outputs.repository }}
+          ref: ${{ steps.tooling.outputs.ref }}
+          path: .nl-respec-tooling
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions
+            .github/mermaid-svg
+            .github/workflows
+
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -103,6 +142,12 @@ jobs:
       - name: Generate HTML snapshot
         run: npx --yes respec@37.3.2 --localhost --disable-sandbox --timeout 120 --src index.html --out snapshot.html
 
+      - name: Normaliseer mermaid-diagrammen in snapshot
+        run: |
+          set -euo pipefail
+          (cd "$TOOLING_DIR/.github/mermaid-svg" && npm ci --ignore-scripts --no-audit --no-fund)
+          node "$TOOLING_DIR/.github/workflows/normalize-mermaid-svg.mjs" snapshot.html
+
       - name: Check localized header links
         run: |
           if [ -f scripts/check-localized-header-links.mjs ]; then
@@ -124,22 +169,22 @@ jobs:
             fi
           done
 
+          find "$PUBLICATION_DIR" -type f \
+            \( -name '*.respec.html' -o -name '*.respec.catalog.xhtml' \) \
+            -delete
+
+      # Dezelfde controle (versie en opties) draait bij de PR-controle van
+      # docs.geostandaarden.nl; zie .github/actions/.
       - name: Validate publication HTML
         id: publication-html
-        uses: anishathalye/proof-html@f060b7619c2410bd85d970459a60ef431cf47ed5 # v2.2.5
+        uses: ./.nl-respec-tooling/.github/actions/validate-html
         with:
           directory: publication-validation
-          check_html: true
-          check_css: false
-          disable_external: true
-          check_external_hash: false
-          enforce_https: false
-          ignore_url: ${{ steps.config.outputs.pdf_uri }}
-          ignore_empty_alt: true
+          ignore: ${{ steps.config.outputs.pdf_uri }}
 
       - name: Copy pdf.js if needed
         if: ${{ steps.config.outputs.pdf == 'true' }}
-        run: cp .github/workflows/pdf.js .
+        run: cp "$TOOLING_DIR/.github/workflows/pdf.js" .
 
       - name: Generate PDF(s)
         if: ${{ steps.config.outputs.pdf == 'true' }}
@@ -241,19 +286,13 @@ jobs:
       - name: Validate publication links
         id: publication-links
         if: ${{ !cancelled() }}
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        uses: ./.nl-respec-tooling/.github/actions/check-links
         with:
-          args: >-
-            --exclude '${{ steps.config.outputs.pdf_uri }}$'
-            --exclude '^https?://docs\.geostandaarden\.nl'
-            --root-dir "${{ github.workspace }}/publication-validation"
-            './**/*.html'
-          fail: true
-          failIfEmpty: true
-          format: markdown
-          jobSummary: true
+          files: "'./index.html'"
+          pdf-uri: ${{ steps.config.outputs.pdf_uri }}
+          root-dir: ${{ github.workspace }}/publication-validation
+          working-directory: ${{ github.workspace }}/publication-validation
           output: ${{ runner.temp }}/nl-respec-validation/link-check.txt
-          workingDirectory: ${{ github.workspace }}/publication-validation
 
       - name: Summarize publication preflight
         if: ${{ always() }}
