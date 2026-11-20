@@ -289,7 +289,7 @@ jobs:
         uses: ./.nl-respec-tooling/.github/actions/check-links
         with:
           files: "'./index.html'"
-          pdf-uri: ${{ steps.config.outputs.pdf_uri }}
+          exclude: ['^https?://docs\.geostandaarden\.nl',${{ steps.config.outputs.pdf_uri }}]
           root-dir: ${{ github.workspace }}/publication-validation
           working-directory: ${{ github.workspace }}/publication-validation
           output: ${{ runner.temp }}/nl-respec-validation/link-check.txt

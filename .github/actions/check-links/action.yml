@@ -31,8 +31,7 @@ runs:
       uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
       with:
         args: >-
-          ${{ inputs.pdf_uri != '' && format('--exclude "{0}"', inputs.pdf_uri) || '' }}
-          --exclude '^https?://docs\.geostandaarden\.nl'
+          --exclude ${{ inputs.exclude }}
           --root-dir "${{ inputs.root-dir }}"
           ${{ inputs.remap != '' && format('--remap "{0}"', inputs.remap) || '' }}
           ${{ inputs.files }}
