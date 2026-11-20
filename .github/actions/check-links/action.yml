@@ -5,6 +5,10 @@ description: >-
   gebruiken.
 
 inputs:
+  args:
+    description: additionele argumenten, bijv. de te excluden paths en files.
+    required: false
+    default: ""
   files:
     description: De te controleren bestanden, als Lychee-argumenten (gequote).
     required: true
@@ -31,7 +35,7 @@ runs:
       uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
       with:
         args: >-
-          ${{ inputs.args }}
+          ${{ inputs.args}}
           --root-dir "${{ inputs.root-dir }}"
           ${{ inputs.remap != '' && format('--remap "{0}"', inputs.remap) || '' }}
           ${{ inputs.files }}
