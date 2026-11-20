@@ -31,7 +31,7 @@ runs:
       uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
       with:
         args: >-
-          --exclude ${{ inputs.exclude }}
+          ${{ inputs.args }}
           --root-dir "${{ inputs.root-dir }}"
           ${{ inputs.remap != '' && format('--remap "{0}"', inputs.remap) || '' }}
           ${{ inputs.files }}
